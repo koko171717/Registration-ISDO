@@ -1,0 +1,59 @@
+const SUPABASE_URL=process.env.SUPABASE_URL;
+const SECRET=process.env.SUPABASE_SERVICE_ROLE_KEY;
+function H(){return{apikey:SECRET,Authorization:`Bearer ${SECRET}`}}
+async function authUser(req){
+  const t=(req.headers.authorization||"").replace("Bearer ","");
+  if(!t)throw E(401,"Not signed in.");
+  const r=await fetch(`${SUPABASE_URL}/auth/v1/user`,{headers:{apikey:SECRET,Authorization:`Bearer ${t}`}});
+  if(!r.ok)throw E(401,"Session expired.");
+  return r.json();
+}
+async function q(table,query){
+  const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`,{headers:H()});
+  if(!r.ok)throw await RE(r);
+  return r.json();
+}
+async function patch(table,query,body){
+  const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`,{
+    method:"PATCH",headers:{...H(),"Content-Type":"application/json"},body:JSON.stringify(body)
+  });
+  if(!r.ok)throw await RE(r);
+}
+async function del(table,query){
+  const r=await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`,{method:"DELETE",headers:H()});
+  if(!r.ok)throw await RE(r);
+}
+async function assertAdmin(uid){
+  const roles=await q("user_roles",`select=role&user_id=eq.${uid}`);
+  if(!roles.some(x=>x.role==="admin"))throw E(403,"Admin access required.");
+}
+async function RE(r){let d={};try{d=await r.json()}catch{}return E(r.status,d.message||"Database error")}
+function E(s,m){const e=new Error(m);e.statusCode=s;return e}
+
+export default async function handler(req,res){
+  if(!["PATCH","DELETE"].includes(req.method))return res.status(405).json({error:"Method not allowed"});
+  try{
+    const u=await authUser(req);await assertAdmin(u.id);
+    const b=req.body||{},id=b.player_id;
+    if(!id)throw E(400,"Player ID required.");
+
+    if(req.method==="DELETE"){
+      await del("players",`id=eq.${id}`);
+      return res.json({ok:true});
+    }
+
+    if(!b.first_name||!b.last_name||!b.origin_club_id)throw E(400,"Missing required fields.");
+
+    await patch("players",`id=eq.${id}`,{
+      first_name:b.first_name,
+      last_name:b.last_name,
+      jersey_number:b.jersey_number||null,
+      origin_club_id:b.origin_club_id,
+      updated_at:new Date().toISOString()
+    });
+
+    res.json({ok:true});
+  }catch(e){
+    res.status(e.statusCode||500).json({error:e.message});
+  }
+}
