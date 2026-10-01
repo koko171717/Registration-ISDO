@@ -8,6 +8,10 @@
 </head>
 <body>
   <main class="live-shell">
+    <div id="previewTools" class="preview-tools hidden">
+      <button id="openOverlayButton" type="button">Open PRISM overlay</button>
+      <button id="copyOverlayButton" type="button" class="secondary-control">Copy PRISM URL</button>
+    </div>
     <section id="loading" class="state-card">Loading roster…</section>
 
     <section id="errorView" class="state-card hidden">
@@ -18,7 +22,7 @@
     <section id="rosterView" class="roster-board hidden">
       <header class="roster-header">
         <div class="brand-block">
-          <img src="/assets/isdo27-logo.png" alt="ISDO'27" class="live-logo">
+          <img id="teamLogo" src="/assets/isdo27-logo.png" alt="Team logo" class="live-logo">
           <div>
             <p class="eyebrow">International Sharks Dodgeball Open</p>
             <h1 id="teamName">Team</h1>
