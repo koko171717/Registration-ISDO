@@ -60,64 +60,184 @@ button{
 .hero{
   position:relative;
   overflow:hidden;
+
   background:
-    radial-gradient(circle at top left, rgba(255,255,255,.04), transparent 24%),
-    linear-gradient(135deg, #0b1018 0%, #111722 45%, #0c1118 100%);
+    radial-gradient(
+      circle at top left,
+      rgba(255,255,255,.045),
+      transparent 26%
+    ),
+    linear-gradient(
+      135deg,
+      #0a0f17 0%,
+      #111722 46%,
+      #0c1119 100%
+    );
+
   color:#fff;
+
   border-radius:30px;
+
   padding:28px 30px 24px;
-  box-shadow:var(--shadow);
+
+  box-shadow:
+    0 22px 65px rgba(17,20,28,.13),
+    inset 0 1px 0 rgba(255,255,255,.04);
+
   margin-bottom:22px;
 }
 
+
+/* Halo rouge ISDO en haut à droite */
+
 .hero::before{
   content:"";
+
   position:absolute;
-  width:320px;
-  height:320px;
-  right:-120px;
-  top:-120px;
+
+  width:340px;
+  height:340px;
+
+  right:-125px;
+  top:-145px;
+
   border-radius:50%;
-  background:radial-gradient(circle, rgba(239,47,79,.16) 0%, rgba(239,47,79,.06) 45%, transparent 72%);
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(239,47,79,.18) 0%,
+      rgba(239,47,79,.08) 42%,
+      rgba(239,47,79,.02) 64%,
+      transparent 74%
+    );
+
+  pointer-events:none;
 }
+
+
+/* Cercle bleu/turquoise discret en bas */
 
 .hero::after{
   content:"";
+
   position:absolute;
-  width:280px;
-  height:280px;
-  right:120px;
-  bottom:-170px;
+
+  width:290px;
+  height:290px;
+
+  right:110px;
+  bottom:-185px;
+
   border-radius:50%;
-  border:34px solid rgba(71,169,186,.12);
+
+  border:34px solid rgba(65,160,181,.11);
+
+  box-shadow:
+    0 0 60px rgba(65,160,181,.04);
+
+  pointer-events:none;
 }
+
+
+/* Zone logo + titre */
 
 .hero-brand{
   position:relative;
-  z-index:1;
+
+  z-index:2;
+
   display:flex;
+
   align-items:center;
+
   gap:22px;
 }
+
+
+/* Petit élément de relief graphique */
+
+.hero-brand::after{
+  content:"";
+
+  position:absolute;
+
+  right:35px;
+  top:8px;
+
+  width:160px;
+  height:160px;
+
+  border-radius:34px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.055),
+      rgba(255,255,255,.01)
+    );
+
+  border:
+    1px solid rgba(255,255,255,.035);
+
+  transform:
+    rotate(18deg);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035);
+
+  pointer-events:none;
+
+  z-index:-1;
+}
+
+
+/* Conteneur logo */
 
 .logo-shell{
   width:132px;
   height:132px;
+
   flex:0 0 132px;
+
   display:grid;
+
   place-items:center;
+
   border-radius:22px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:0 12px 32px rgba(0,0,0,.20);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.07),
+      rgba(255,255,255,.025)
+    );
+
+  border:
+    1px solid rgba(255,255,255,.11);
+
+  box-shadow:
+    0 14px 32px rgba(0,0,0,.23),
+    inset 0 1px 0 rgba(255,255,255,.04);
+
   padding:8px;
 }
+
+
+/* Logo */
 
 .event-logo{
   width:100%;
   height:100%;
+
   object-fit:contain;
+
   display:block;
+
+  filter:
+    drop-shadow(
+      0 8px 14px rgba(0,0,0,.18)
+    );
 }
 
 .eyebrow,
