@@ -1,0 +1,337 @@
+:root{
+  --bg:#090d14;
+  --surface:#101620;
+  --surface-2:#151c27;
+  --ink:#f7f8fb;
+  --muted:#aab2bf;
+  --line:rgba(255,255,255,.10);
+  --red:#ef2f4f;
+  --turquoise:#41a0b5;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 90% 6%, rgba(239,47,79,.20), transparent 28%),
+    radial-gradient(circle at 75% 100%, rgba(65,160,181,.15), transparent 28%),
+    var(--bg);
+  color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+body{min-height:100vh}
+
+.hidden{display:none!important}
+
+.live-shell{
+  width:min(1500px,calc(100% - 32px));
+  margin:24px auto;
+}
+
+.state-card{
+  max-width:720px;
+  margin:120px auto;
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:var(--surface);
+}
+
+.roster-board{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:rgba(12,17,24,.94);
+  box-shadow:0 28px 90px rgba(0,0,0,.34);
+}
+
+.roster-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:28px 32px;
+  border-bottom:1px solid var(--line);
+}
+
+.brand-block{
+  display:flex;
+  align-items:center;
+  gap:22px;
+}
+
+.live-logo{
+  width:130px;
+  height:130px;
+  object-fit:contain;
+}
+
+.eyebrow{
+  margin:0 0 7px;
+  color:var(--red);
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.roster-header h1{
+  margin:0;
+  font-size:clamp(2rem,5vw,4.2rem);
+  line-height:.95;
+  letter-spacing:-.05em;
+}
+
+.club-name{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:1.05rem;
+}
+
+.category-badge{
+  flex:0 0 auto;
+  padding:11px 17px;
+  border:1px solid rgba(65,160,181,.35);
+  border-radius:999px;
+  background:rgba(65,160,181,.13);
+  color:#8dd7e7;
+  font-size:.9rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.roster-list-wrap{
+  padding:10px 24px 20px;
+}
+
+.roster-table-head,
+.roster-row{
+  display:grid;
+  grid-template-columns:90px minmax(220px,1fr) minmax(220px,1fr) 90px;
+  gap:18px;
+  align-items:center;
+}
+
+.roster-table-head{
+  padding:16px 18px 10px;
+  color:#798390;
+  font-size:.72rem;
+  font-weight:850;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.roster-row{
+  min-height:68px;
+  padding:12px 18px;
+  border-top:1px solid var(--line);
+}
+
+.roster-number{
+  font-size:1.35rem;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+
+.roster-name{
+  font-size:1.15rem;
+  font-weight:750;
+}
+
+.roster-first{
+  font-size:1.05rem;
+  color:#d7dce4;
+}
+
+.role-badge{
+  display:inline-grid;
+  place-items:center;
+  width:42px;
+  min-height:30px;
+  border-radius:999px;
+  background:rgba(239,47,79,.15);
+  color:#ff7188;
+  font-size:.75rem;
+  font-weight:900;
+}
+
+.live-footer{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:16px 32px;
+  border-top:1px solid var(--line);
+  color:#727c89;
+  font-size:.78rem;
+}
+
+.live-footer span:first-child{
+  color:var(--red);
+  font-weight:900;
+}
+
+@media(max-width:720px){
+  .live-shell{width:min(100% - 16px,1500px);margin:8px auto}
+
+  .roster-header{
+    align-items:flex-start;
+    padding:20px;
+  }
+
+  .brand-block{gap:12px}
+  .live-logo{width:82px;height:82px}
+  .category-badge{padding:8px 11px;font-size:.72rem}
+
+  .roster-list-wrap{padding:6px 10px 14px}
+
+  .roster-table-head,
+  .roster-row{
+    grid-template-columns:52px 1fr 1fr 48px;
+    gap:8px;
+  }
+
+  .roster-table-head{padding:12px 8px 8px}
+  .roster-row{padding:10px 8px;min-height:58px}
+  .roster-name,.roster-first{font-size:.9rem}
+  .roster-number{font-size:1rem}
+
+  .live-footer{padding:14px 18px}
+}
+
+
+/* ===========================
+   PREVIEW CONTROLS
+   =========================== */
+
+.preview-tools{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.preview-tools button{
+  min-height:42px;
+  padding:0 15px;
+  border:0;
+  border-radius:11px;
+  background:#ef2f4f;
+  color:#fff;
+  font:inherit;
+  font-size:.85rem;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.preview-tools .secondary-control{
+  background:#151c27;
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.preview-tools button:hover{
+  filter:brightness(1.06);
+}
+
+
+/* ===========================
+   PRISM OVERLAY MODE
+   URL: ?team=...&mode=overlay
+   =========================== */
+
+html.overlay-mode,
+html.overlay-mode body{
+  width:100%;
+  min-height:100%;
+  background:transparent !important;
+}
+
+body[data-mode="overlay"]{
+  overflow:hidden;
+}
+
+body[data-mode="overlay"] .live-shell{
+  width:100vw;
+  height:100vh;
+  margin:0;
+  padding:4vh 4vw;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:transparent;
+}
+
+body[data-mode="overlay"] .preview-tools{
+  display:none !important;
+}
+
+body[data-mode="overlay"] .state-card{
+  margin:auto;
+}
+
+body[data-mode="overlay"] .roster-board{
+  width:min(1180px,92vw);
+  max-height:92vh;
+
+  border-radius:26px;
+
+  background:
+    linear-gradient(135deg,rgba(11,16,24,.97),rgba(15,21,31,.97));
+
+  box-shadow:
+    0 28px 80px rgba(0,0,0,.34),
+    0 0 0 1px rgba(255,255,255,.03);
+}
+
+body[data-mode="overlay"] .roster-header{
+  padding:24px 28px;
+}
+
+body[data-mode="overlay"] .live-logo{
+  width:112px;
+  height:112px;
+}
+
+body[data-mode="overlay"] .roster-header h1{
+  font-size:clamp(2rem,4vw,3.5rem);
+}
+
+body[data-mode="overlay"] .roster-list-wrap{
+  padding:8px 22px 18px;
+}
+
+body[data-mode="overlay"] .roster-row{
+  min-height:58px;
+}
+
+body[data-mode="overlay"] .live-footer{
+  padding:13px 28px;
+}
+
+/* Hide footer if a very compact browser source is required later
+   by adding &compact=1 in a future version. */
+
+@media(max-width:720px){
+  .preview-tools{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .preview-tools button{
+    width:100%;
+  }
+
+  body[data-mode="overlay"] .live-shell{
+    padding:2vh 2vw;
+  }
+
+  body[data-mode="overlay"] .roster-board{
+    width:96vw;
+    max-height:96vh;
+  }
+}
