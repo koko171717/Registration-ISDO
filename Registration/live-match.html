@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ISDO'27 Match Rosters</title>
+  <link rel="stylesheet" href="/css/live-match.css">
+</head>
+<body>
+  <main class="match-shell">
+
+    <section id="selectionPanel" class="selection-panel">
+
+      <div class="selection-head">
+        <p class="eyebrow">International Sharks Dodgeball Open</p>
+        <h1>Match roster overlay</h1>
+        <p class="selection-copy">
+          Choose a club, then one of its teams for each side.
+        </p>
+      </div>
+
+      <div class="team-picker-grid">
+
+        <article class="team-picker-card team-a-picker">
+          <div class="picker-title">
+            <span class="picker-letter">A</span>
+            <div>
+              <p>Team A</p>
+              <strong id="team1Summary">Select a team</strong>
+            </div>
+          </div>
+
+          <div class="picker-fields">
+            <label class="field">
+              <span>Club</span>
+              <select id="club1Select">
+                <option value="">Select a club…</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Team</span>
+              <select id="team1Select" disabled>
+                <option value="">Select a club first…</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="team-preview">
+            <div class="preview-logo-shell">
+              <img id="team1PreviewLogo" src="/assets/isdo27-logo.png" alt="Team A logo">
+            </div>
+            <div>
+              <span id="team1PreviewCategory" class="preview-category">—</span>
+              <strong id="team1PreviewName">No team selected</strong>
+              <small id="team1PreviewClub">—</small>
+            </div>
+          </div>
+        </article>
+
+
+        <div class="versus">VS</div>
+
+
+        <article class="team-picker-card team-b-picker">
+          <div class="picker-title">
+            <span class="picker-letter">B</span>
+            <div>
+              <p>Team B</p>
+              <strong id="team2Summary">Select a team</strong>
+            </div>
+          </div>
+
+          <div class="picker-fields">
+            <label class="field">
+              <span>Club</span>
+              <select id="club2Select">
+                <option value="">Select a club…</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>Team</span>
+              <select id="team2Select" disabled>
+                <option value="">Select a club first…</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="team-preview">
+            <div class="preview-logo-shell">
+              <img id="team2PreviewLogo" src="/assets/isdo27-logo.png" alt="Team B logo">
+            </div>
+            <div>
+              <span id="team2PreviewCategory" class="preview-category">—</span>
+              <strong id="team2PreviewName">No team selected</strong>
+              <small id="team2PreviewClub">—</small>
+            </div>
+          </div>
+        </article>
+
+      </div>
+
+      <p id="selectionMessage" class="selection-message hidden"></p>
+
+      <div class="selection-actions">
+        <button id="previewButton" type="button">Preview match rosters</button>
+        <button id="openOverlayButton" type="button" class="secondary">Open PRISM overlay</button>
+        <button id="copyOverlayButton" type="button" class="secondary">Copy PRISM URL</button>
+      </div>
+
+    </section>
+
+
+    <section id="loading" class="state-card hidden">Loading rosters…</section>
+
+    <section id="errorView" class="state-card hidden">
+      <h2>Overlay unavailable</h2>
+      <p id="errorMessage"></p>
+    </section>
+
+
+    <section id="matchView" class="match-board hidden">
+
+      <div class="team-column" id="team1Card">
+        <header class="team-header">
+          <div class="team-brand">
+            <img id="team1Logo" src="/assets/isdo27-logo.png" alt="Team A logo" class="team-logo">
+            <div class="team-head-copy">
+              <p class="team-eyebrow">International Sharks Dodgeball Open</p>
+              <h2 id="team1Name">Team A</h2>
+              <p id="team1Club" class="team-club">Club</p>
+            </div>
+          </div>
+          <div class="team-category" id="team1Category">Category</div>
+        </header>
+
+        <div class="roster-wrap">
+          <div class="roster-head">
+            <span>#</span>
+            <span>Last name</span>
+            <span>First name</span>
+            <span>Role</span>
+          </div>
+          <div id="team1Players" class="roster-body"></div>
+        </div>
+
+        <footer class="team-footer">
+          <span>ISDO'27</span>
+          <span>Morges · Switzerland</span>
+        </footer>
+      </div>
+
+
+      <div class="team-column" id="team2Card">
+        <header class="team-header">
+          <div class="team-brand">
+            <img id="team2Logo" src="/assets/isdo27-logo.png" alt="Team B logo" class="team-logo">
+            <div class="team-head-copy">
+              <p class="team-eyebrow">International Sharks Dodgeball Open</p>
+              <h2 id="team2Name">Team B</h2>
+              <p id="team2Club" class="team-club">Club</p>
+            </div>
+          </div>
+          <div class="team-category" id="team2Category">Category</div>
+        </header>
+
+        <div class="roster-wrap">
+          <div class="roster-head">
+            <span>#</span>
+            <span>Last name</span>
+            <span>First name</span>
+            <span>Role</span>
+          </div>
+          <div id="team2Players" class="roster-body"></div>
+        </div>
+
+        <footer class="team-footer">
+          <span>ISDO'27</span>
+          <span>Morges · Switzerland</span>
+        </footer>
+      </div>
+
+    </section>
+
+  </main>
+
+  <script src="/js/live-match.js"></script>
+</body>
+</html>
