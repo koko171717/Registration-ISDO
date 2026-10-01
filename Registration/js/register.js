@@ -1,63 +1,63 @@
-const db=window.isdoSupabase;
+const db = window.isdoSupabase;
 
-const state={
-  step:1,
-  clubs:[],
-  categories:[],
-  teams:[],
-  access:[],
-  mealDays:[],
-  sandwichOptions:[],
-  legalDocuments:[]
+const state = {
+  step: 1,
+  clubs: [],
+  categories: [],
+  teams: [],
+  access: [],
+  mealDays: [],
+  sandwichOptions: [],
+  legalDocuments: []
 };
 
-const $=id=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-const e={
-  form:$("registrationForm"),
-  loading:$("loading"),
-  fatal:$("fatal"),
-  fatalMessage:$("fatalMessage"),
-  success:$("success"),
-  emailSuccess:$("emailSuccess"),
-  emailWarning:$("emailWarning"),
-  editLink:$("editLink"),
-  copyEditLink:$("copyEditLink"),
-  progressFill:$("progressFill"),
-  progressText:$("progressText"),
-  back:$("backButton"),
-  next:$("nextButton"),
-  submit:$("submitButton"),
-  error:$("formError"),
-  first:$("firstName"),
-  last:$("lastName"),
-  birth:$("birthDate"),
-  nationality:$("nationality"),
-  email:$("email"),
-  jersey:$("jerseyNumber"),
-  origin:$("originClub"),
-  cat1:$("category1"),
-  team1:$("team1"),
-  toggle2:$("secondCategoryToggle"),
-  block2:$("team2Block"),
-  cat2:$("category2"),
-  team2:$("team2"),
-  meals:$("mealChoices"),
-  mealTotal:$("mealTotal"),
-  legal:$("legalDocuments"),
-  review:$("reviewContent"),
-  confirm:$("finalConfirmation")
+const e = {
+  form: $("registrationForm"),
+  loading: $("loading"),
+  fatal: $("fatal"),
+  fatalMessage: $("fatalMessage"),
+  success: $("success"),
+  emailSuccess: $("emailSuccess"),
+  emailWarning: $("emailWarning"),
+  editLink: $("editLink"),
+  copyEditLink: $("copyEditLink"),
+  progressFill: $("progressFill"),
+  progressText: $("progressText"),
+  back: $("backButton"),
+  next: $("nextButton"),
+  submit: $("submitButton"),
+  error: $("formError"),
+  first: $("firstName"),
+  last: $("lastName"),
+  birth: $("birthDate"),
+  nationality: $("nationality"),
+  email: $("email"),
+  jersey: $("jerseyNumber"),
+  origin: $("originClub"),
+  cat1: $("category1"),
+  team1: $("team1"),
+  toggle2: $("secondCategoryToggle"),
+  block2: $("team2Block"),
+  cat2: $("category2"),
+  team2: $("team2"),
+  meals: $("mealChoices"),
+  mealTotal: $("mealTotal"),
+  legal: $("legalDocuments"),
+  review: $("reviewContent"),
+  confirm: $("finalConfirmation")
 };
 
-document.addEventListener("DOMContentLoaded",init);
+document.addEventListener("DOMContentLoaded", init);
 
-async function init(){
-  try{
-    const qs=await Promise.all([
+async function init() {
+  try {
+    const qs = await Promise.all([
       db
         .from("clubs")
         .select("id,name,country,active")
-        .eq("active",true)
+        .eq("active", true)
         .order("name"),
 
       db
@@ -66,8 +66,10 @@ async function init(){
 
       db
         .from("teams")
-        .select("id,managing_club_id,category_id,display_name,active")
-        .eq("active",true),
+        .select(
+          "id,managing_club_id,category_id,display_name,active"
+        )
+        .eq("active", true),
 
       db
         .from("team_origin_club_access")
@@ -75,27 +77,33 @@ async function init(){
 
       db
         .from("meal_days")
-        .select("id,name,event_date,price_chf,active")
-        .eq("active",true)
+        .select(
+          "id,name,event_date,price_chf,active"
+        )
+        .eq("active", true)
         .order("event_date"),
 
       db
         .from("sandwich_options")
-        .select("id,name,sort_order,active")
-        .eq("active",true)
+        .select(
+          "id,name,sort_order,active"
+        )
+        .eq("active", true)
         .order("sort_order"),
 
       db
         .from("legal_documents")
-        .select("id,document_type,version,title,content,active")
-        .eq("active",true)
+        .select(
+          "id,document_type,version,title,content,active"
+        )
+        .eq("active", true)
         .order("created_at")
     ]);
 
-    const bad=qs.find(x=>x.error);
+    const badResult = qs.find(result => result.error);
 
-    if(bad){
-      throw bad.error;
+    if (badResult) {
+      throw badResult.error;
     }
 
     [
@@ -106,7 +114,7 @@ async function init(){
       state.mealDays,
       state.sandwichOptions,
       state.legalDocuments
-    ]=qs.map(x=>x.data||[]);
+    ] = qs.map(result => result.data || []);
 
     renderClubs();
     renderMeals();
@@ -118,71 +126,71 @@ async function init(){
 
     updateStep();
 
-  }catch(err){
+  } catch (err) {
     console.error(err);
 
     e.loading.classList.add("hidden");
     e.fatal.classList.remove("hidden");
 
-    e.fatalMessage.textContent=
+    e.fatalMessage.textContent =
       "The registration form could not load.";
   }
 }
 
-function bind(){
+function bind() {
 
-  e.origin.onchange=()=>{
+  e.origin.onchange = () => {
     resetTeams();
     renderCategories(e.cat1);
   };
 
-  e.cat1.onchange=()=>{
+  e.cat1.onchange = () => {
 
     renderTeams(
       e.team1,
       e.cat1.value
     );
 
-    if(e.toggle2.checked){
+    if (e.toggle2.checked) {
 
       renderCategories(
         e.cat2,
         e.cat1.value
       );
 
-      e.team2.innerHTML=
+      e.team2.innerHTML =
         '<option value="">Select a team</option>';
 
-      e.team2.disabled=true;
+      e.team2.disabled = true;
     }
   };
 
-  e.toggle2.onchange=()=>{
+  e.toggle2.onchange = () => {
 
     e.block2.classList.toggle(
       "hidden",
       !e.toggle2.checked
     );
 
-    if(e.toggle2.checked){
+    if (e.toggle2.checked) {
 
       renderCategories(
         e.cat2,
         e.cat1.value
       );
 
-    }else{
+    } else {
 
-      e.cat2.value="";
+      e.cat2.value = "";
 
-      e.team2.innerHTML=
+      e.team2.innerHTML =
         '<option value="">Select a team</option>';
 
-      e.team2.disabled=true;
+      e.team2.disabled = true;
     }
   };
 
-  e.cat2.onchange=()=>{
+  e.cat2.onchange = () => {
 
     renderTeams(
       e.team2,
@@ -191,9 +199,9 @@ function bind(){
 
   };
 
-  e.back.onclick=()=>{
+  e.back.onclick = () => {
 
-    if(state.step>1){
+    if (state.step > 1) {
 
       state.step--;
 
@@ -203,17 +211,17 @@ function bind(){
     }
   };
 
-  e.next.onclick=()=>{
+  e.next.onclick = () => {
 
-    if(!validateStep()){
+    if (!validateStep()) {
       return;
     }
 
-    if(state.step<5){
+    if (state.step < 5) {
 
       state.step++;
 
-      if(state.step===5){
+      if (state.step === 5) {
         renderReview();
       }
 
@@ -222,18 +230,18 @@ function bind(){
       updateStep();
 
       scrollTo({
-        top:0,
-        behavior:"smooth"
+        top: 0,
+        behavior: "smooth"
       });
     }
   };
 
-  e.form.onsubmit=submitForm;
+  e.form.onsubmit = submitForm;
 }
 
-function renderClubs(){
+function renderClubs() {
 
-  state.clubs.forEach(club=>{
+  state.clubs.forEach(club => {
 
     e.origin.add(
       new Option(
@@ -245,97 +253,97 @@ function renderClubs(){
   });
 }
 
-function resetTeams(){
+function resetTeams() {
 
-  e.cat1.innerHTML=
+  e.cat1.innerHTML =
     '<option value="">Select a category</option>';
 
-  e.team1.innerHTML=
+  e.team1.innerHTML =
     '<option value="">Select a team</option>';
 
-  e.cat2.innerHTML=
+  e.cat2.innerHTML =
     '<option value="">Select a category</option>';
 
-  e.team2.innerHTML=
+  e.team2.innerHTML =
     '<option value="">Select a team</option>';
 
-  e.cat1.disabled=
+  e.cat1.disabled =
     !e.origin.value;
 
-  e.team1.disabled=true;
-  e.team2.disabled=true;
+  e.team1.disabled = true;
+  e.team2.disabled = true;
 }
 
-function allowedTeams(){
+function allowedTeams() {
 
-  const ids=new Set(
+  const ids = new Set(
 
     state.access
       .filter(
-        access=>
-          access.origin_club_id===
+        access =>
+          access.origin_club_id ===
           e.origin.value
       )
       .map(
-        access=>
+        access =>
           access.team_id
       )
 
   );
 
   return state.teams.filter(
-    team=>ids.has(team.id)
+    team => ids.has(team.id)
   );
 }
 
 function renderCategories(
   select,
-  exclude=""
-){
+  exclude = ""
+) {
 
-  const ids=new Set(
+  const ids = new Set(
     allowedTeams()
       .map(
-        team=>
+        team =>
           team.category_id
       )
   );
 
-  select.innerHTML=
+  select.innerHTML =
     '<option value="">Select a category</option>';
 
   state.categories
 
     .filter(
-      category=>
+      category =>
         ids.has(category.id) &&
-        category.id!==exclude
+        category.id !== exclude
     )
 
     .sort(
-      (a,b)=>
+      (a, b) =>
 
         (
           {
-            Men:1,
-            Women:2,
-            Mixed:3
-          }[a.name]||9
+            Men: 1,
+            Women: 2,
+            Mixed: 3
+          }[a.name] || 9
         )
 
         -
 
         (
           {
-            Men:1,
-            Women:2,
-            Mixed:3
-          }[b.name]||9
+            Men: 1,
+            Women: 2,
+            Mixed: 3
+          }[b.name] || 9
         )
     )
 
     .forEach(
-      category=>
+      category =>
 
         select.add(
           new Option(
@@ -346,18 +354,18 @@ function renderCategories(
 
     );
 
-  select.disabled=
+  select.disabled =
     !e.origin.value;
 }
 
-function teamName(team){
+function teamName(team) {
 
   return (
     team.display_name ||
 
     state.clubs.find(
-      club=>
-        club.id===
+      club =>
+        club.id ===
         team.managing_club_id
     )?.name ||
 
@@ -368,29 +376,29 @@ function teamName(team){
 function renderTeams(
   select,
   category
-){
+) {
 
-  select.innerHTML=
+  select.innerHTML =
     '<option value="">Select a team</option>';
 
-  if(!category){
+  if (!category) {
 
-    select.disabled=true;
+    select.disabled = true;
 
     return;
   }
 
-  const teams=
+  const teams =
     allowedTeams()
 
       .filter(
-        team=>
-          team.category_id===
+        team =>
+          team.category_id ===
           category
       )
 
       .sort(
-        (a,b)=>
+        (a, b) =>
           teamName(a)
             .localeCompare(
               teamName(b)
@@ -398,7 +406,7 @@ function renderTeams(
       );
 
   teams.forEach(
-    team=>
+    team =>
 
       select.add(
         new Option(
@@ -409,32 +417,32 @@ function renderTeams(
 
   );
 
-  select.disabled=false;
+  select.disabled = false;
 
-  if(teams.length===1){
+  if (teams.length === 1) {
 
-    select.value=
+    select.value =
       teams[0].id;
   }
 }
 
-function renderMeals(){
+function renderMeals() {
 
-  e.meals.innerHTML="";
+  e.meals.innerHTML = "";
 
-  state.mealDays.forEach(day=>{
+  state.mealDays.forEach(day => {
 
-    const div=
+    const div =
       document.createElement("div");
 
-    div.className=
+    div.className =
       "meal-card";
 
-    const select=
+    const select =
       document.createElement("select");
 
-    select.id=
-      "meal-"+day.id;
+    select.id =
+      "meal-" + day.id;
 
     select.add(
       new Option(
@@ -444,7 +452,7 @@ function renderMeals(){
     );
 
     state.sandwichOptions.forEach(
-      option=>
+      option =>
 
         select.add(
           new Option(
@@ -455,12 +463,12 @@ function renderMeals(){
 
     );
 
-    select.onchange=
+    select.onchange =
       mealTotal;
 
-    div.innerHTML=
-      "<h3>"+
-      esc(day.name)+
+    div.innerHTML =
+      "<h3>" +
+      esc(day.name) +
       "</h3>";
 
     div.appendChild(select);
@@ -472,17 +480,17 @@ function renderMeals(){
   mealTotal();
 }
 
-function mealTotal(){
+function mealTotal() {
 
-  let total=0;
+  let total = 0;
 
   state.mealDays.forEach(
-    day=>{
+    day => {
 
-      if(
-        $("meal-"+day.id)?.value
-      ){
-        total+=
+      if (
+        $("meal-" + day.id)?.value
+      ) {
+        total +=
           Number(
             day.price_chf
           );
@@ -490,52 +498,52 @@ function mealTotal(){
     }
   );
 
-  e.mealTotal.textContent=
-    "CHF "+
+  e.mealTotal.textContent =
+    "CHF " +
     (
       Number.isInteger(total)
-        ? total+".–"
+        ? total + ".–"
         : total.toFixed(2)
     );
 }
 
-function renderLegal(){
+function renderLegal() {
 
-  if(
+  if (
     !state.legalDocuments.length
-  ){
+  ) {
 
-    e.legal.innerHTML=
-      '<div class="info">'+
-      '<strong>'+
-      'Legal documents have not been configured yet.'+
-      '</strong>'+
+    e.legal.innerHTML =
+      '<div class="info">' +
+      '<strong>' +
+      'Legal documents have not been configured yet.' +
+      '</strong>' +
       '</div>';
 
     return;
   }
 
-  e.legal.innerHTML=
+  e.legal.innerHTML =
     state.legalDocuments
 
       .map(
-        document=>
+        legalDocument =>
           `
           <article class="legal-card">
 
             <h3>
-              ${esc(document.title)}
+              ${esc(legalDocument.title)}
             </h3>
 
             <div class="legal-text">
-              ${esc(document.content)}
+              ${esc(legalDocument.content)}
             </div>
 
             <label class="check">
 
               <input
                 type="checkbox"
-                data-legal-id="${document.id}"
+                data-legal-id="${legalDocument.id}"
               >
 
               I confirm that I have read and accept this document.
@@ -549,88 +557,88 @@ function renderLegal(){
       .join("");
 }
 
-function updateStep(){
+function updateStep() {
 
   document
     .querySelectorAll(".step")
     .forEach(
-      step=>
+      step =>
 
         step.classList.toggle(
           "hidden",
           Number(
             step.dataset.step
-          )!==state.step
+          ) !== state.step
         )
 
     );
 
-  e.progressFill.style.width=
-    (state.step*20)+"%";
+  e.progressFill.style.width =
+    (state.step * 20) + "%";
 
-  e.progressText.textContent=
+  e.progressText.textContent =
     `Step ${state.step} of 5`;
 
   e.back.classList.toggle(
     "hidden",
-    state.step===1
+    state.step === 1
   );
 
   e.next.classList.toggle(
     "hidden",
-    state.step===5
+    state.step === 5
   );
 
   e.submit.classList.toggle(
     "hidden",
-    state.step!==5
+    state.step !== 5
   );
 }
 
-function validateStep(){
+function validateStep() {
 
   clearError();
 
-  if(state.step===1){
+  if (state.step === 1) {
 
-    for(
-      const input of[
+    for (
+      const input of [
         e.first,
         e.last,
         e.birth,
         e.nationality,
         e.email
       ]
-    ){
+    ) {
 
-      if(
+      if (
         !input.reportValidity()
-      ){
+      ) {
         return false;
       }
     }
   }
 
-  if(state.step===2){
+  if (state.step === 2) {
 
-    if(
+    if (
       !e.origin.value ||
       !e.cat1.value ||
       !e.team1.value
-    ){
+    ) {
 
       return showError(
         "Please select your club, first category and first team."
       );
     }
 
-    if(
+    if (
       e.toggle2.checked &&
       (
         !e.cat2.value ||
         !e.team2.value
       )
-    ){
+    ) {
 
       return showError(
         "Please complete your second category and team."
@@ -638,29 +646,29 @@ function validateStep(){
     }
   }
 
-  if(state.step===4){
+  if (state.step === 4) {
 
-    if(
+    if (
       !state.legalDocuments.length
-    ){
+    ) {
 
       return showError(
         "Legal documents have not been configured yet."
       );
     }
 
-    const accepted=
+    const accepted =
       [
         ...document.querySelectorAll(
           "[data-legal-id]"
         )
       ]
-      .every(
-        checkbox=>
-          checkbox.checked
-      );
+        .every(
+          checkbox =>
+            checkbox.checked
+        );
 
-    if(!accepted){
+    if (!accepted) {
 
       return showError(
         "Please accept all legal acknowledgements."
@@ -671,58 +679,58 @@ function validateStep(){
   return true;
 }
 
-function renderReview(){
+function renderReview() {
 
-  const club=
+  const club =
     state.clubs.find(
-      item=>
-        item.id===
+      item =>
+        item.id ===
         e.origin.value
     );
 
-  const category1=
+  const category1 =
     state.categories.find(
-      item=>
-        item.id===
+      item =>
+        item.id ===
         e.cat1.value
     );
 
-  const team1=
+  const team1 =
     state.teams.find(
-      item=>
-        item.id===
+      item =>
+        item.id ===
         e.team1.value
     );
 
-  const category2=
+  const category2 =
     state.categories.find(
-      item=>
-        item.id===
+      item =>
+        item.id ===
         e.cat2.value
     );
 
-  const team2=
+  const team2 =
     state.teams.find(
-      item=>
-        item.id===
+      item =>
+        item.id ===
         e.team2.value
     );
 
-  const meals=
+  const meals =
     state.mealDays
 
       .map(
-        day=>{
+        day => {
 
-          const select=
-            $("meal-"+day.id);
+          const select =
+            $("meal-" + day.id);
 
-          const name=
+          const name =
             select.value
 
               ? state.sandwichOptions.find(
-                  option=>
-                    option.id===
+                  option =>
+                    option.id ===
                     select.value
                 )?.name
 
@@ -742,7 +750,7 @@ function renderReview(){
 
       .join("");
 
-  e.review.innerHTML=
+  e.review.innerHTML =
     `
     <div class="review-card">
 
@@ -762,7 +770,7 @@ function renderReview(){
       <p>
         Jersey #
         ${esc(
-          e.jersey.value||
+          e.jersey.value ||
           "—"
         )}
       </p>
@@ -782,7 +790,7 @@ function renderReview(){
         </strong>
 
         ${esc(
-          club?.name||
+          club?.name ||
           ""
         )}
       </p>
@@ -790,7 +798,7 @@ function renderReview(){
       <p>
         <strong>
           ${esc(
-            category1?.name||
+            category1?.name ||
             ""
           )}:
         </strong>
@@ -804,11 +812,11 @@ function renderReview(){
         e.toggle2.checked &&
         team2
 
-        ? `
+          ? `
           <p>
             <strong>
               ${esc(
-                category2?.name||
+                category2?.name ||
                 ""
               )}:
             </strong>
@@ -819,7 +827,7 @@ function renderReview(){
           </p>
         `
 
-        : ""
+          : ""
       }
 
     </div>
@@ -847,34 +855,34 @@ function renderReview(){
     `;
 }
 
-function payload(){
+function payload() {
 
-  const memberships=[
+  const memberships = [
     {
       team_id:
         e.team1.value,
 
-      membership_order:1
+      membership_order: 1
     }
   ];
 
-  if(
+  if (
     e.toggle2.checked
-  ){
+  ) {
 
     memberships.push(
       {
         team_id:
           e.team2.value,
 
-        membership_order:2
+        membership_order: 2
       }
     );
   }
 
-  return{
+  return {
 
-    player:{
+    player: {
 
       first_name:
         e.first.value.trim(),
@@ -895,7 +903,7 @@ function payload(){
 
       jersey_number:
         e.jersey.value.trim()
-        ||null,
+        || null,
 
       origin_club_id:
         e.origin.value
@@ -905,18 +913,18 @@ function payload(){
 
     meals:
       state.mealDays.map(
-        day=>{
+        day => {
 
-          const select=
-            $("meal-"+day.id);
+          const select =
+            $("meal-" + day.id);
 
-          return{
+          return {
 
             meal_day_id:
               day.id,
 
             sandwich_option_id:
-              select.value||
+              select.value ||
               null,
 
             ordered:
@@ -925,46 +933,48 @@ function payload(){
         }
       ),
 
-   legal_acceptances:
-  state.legalDocuments.map(
-    legalDocument=>({
+    legal_acceptances:
+      state.legalDocuments.map(
+        legalDocument => ({
 
-      legal_document_id:
-        legalDocument.id,
+          legal_document_id:
+            legalDocument.id,
 
-      accepted:
-        !!window.document.querySelector(
-          `[data-legal-id="${legalDocument.id}"]`
-        )?.checked
-    })
-  )
+          accepted:
+            !!window.document.querySelector(
+              `[data-legal-id="${legalDocument.id}"]`
+            )?.checked
+        })
+      )
+  };
+}
 
-async function submitForm(ev){
+async function submitForm(ev) {
 
   ev.preventDefault();
 
   clearError();
 
-  if(
+  if (
     !e.confirm.checked
-  ){
+  ) {
 
     return showError(
       "Please confirm that your information is correct."
     );
   }
 
-  e.submit.disabled=true;
+  e.submit.disabled = true;
 
-  try{
+  try {
 
-    const response=
+    const response =
       await fetch(
         "/api/register-player",
         {
-          method:"POST",
+          method: "POST",
 
-          headers:{
+          headers: {
             "Content-Type":
               "application/json"
           },
@@ -976,33 +986,33 @@ async function submitForm(ev){
         }
       );
 
-    const result=
+    const result =
       await response.json();
 
-    if(
+    if (
       !response.ok
-    ){
+    ) {
 
       throw new Error(
-        result.error||
+        result.error ||
         "Registration could not be saved."
       );
     }
 
-    if(
+    if (
       result.edit_url
-    ){
+    ) {
 
-      e.editLink.href=
+      e.editLink.href =
         result.edit_url;
 
-      e.editLink.textContent=
+      e.editLink.textContent =
         result.edit_url;
 
-      e.copyEditLink.onclick=
-        async()=>{
+      e.copyEditLink.onclick =
+        async () => {
 
-          try{
+          try {
 
             await navigator
               .clipboard
@@ -1010,38 +1020,30 @@ async function submitForm(ev){
                 result.edit_url
               );
 
-            e.copyEditLink.textContent=
+            e.copyEditLink.textContent =
               "Copied ✓";
 
             setTimeout(
-              ()=>{
+              () => {
 
-                e.copyEditLink.textContent=
+                e.copyEditLink.textContent =
                   "Copy link";
 
               },
               1800
             );
 
-          }catch{
+          } catch {
 
-            e.copyEditLink.textContent=
+            e.copyEditLink.textContent =
               "Copy failed";
           }
         };
     }
 
-    /*
-     * Affichage du statut e-mail.
-     *
-     * L'inscription reste valide
-     * même si le mail n'a pas pu
-     * être envoyé.
-     */
-
-    if(
+    if (
       result.email_sent
-    ){
+    ) {
 
       e.emailSuccess
         .classList
@@ -1051,7 +1053,7 @@ async function submitForm(ev){
         .classList
         .add("hidden");
 
-    }else{
+    } else {
 
       e.emailSuccess
         .classList
@@ -1071,25 +1073,25 @@ async function submitForm(ev){
     );
 
     scrollTo({
-      top:0,
-      behavior:"smooth"
+      top: 0,
+      behavior: "smooth"
     });
 
-  }catch(err){
+  } catch (err) {
 
     showError(
       err.message
     );
 
-  }finally{
+  } finally {
 
-    e.submit.disabled=false;
+    e.submit.disabled = false;
   }
 }
 
-function showError(message){
+function showError(message) {
 
-  e.error.textContent=
+  e.error.textContent =
     message;
 
   e.error.classList.remove(
@@ -1099,19 +1101,19 @@ function showError(message){
   return false;
 }
 
-function clearError(){
+function clearError() {
 
   e.error.classList.add(
     "hidden"
   );
 
-  e.error.textContent="";
+  e.error.textContent = "";
 }
 
-function esc(value){
+function esc(value) {
 
   return String(
-    value??""
+    value ?? ""
   )
     .replaceAll(
       "&",
