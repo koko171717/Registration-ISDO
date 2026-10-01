@@ -1,0 +1,1059 @@
+:root{
+  --bg:#090d14;
+  --surface:#101620;
+  --surface-2:#151c27;
+  --ink:#f7f8fb;
+  --muted:#aab2bf;
+  --line:rgba(255,255,255,.10);
+  --red:#ef2f4f;
+  --turquoise:#41a0b5;
+}
+
+*{box-sizing:border-box}
+
+html,body{
+  margin:0;
+  min-height:100%;
+  background:
+    radial-gradient(circle at 90% 6%, rgba(239,47,79,.20), transparent 28%),
+    radial-gradient(circle at 75% 100%, rgba(65,160,181,.15), transparent 28%),
+    var(--bg);
+  color:var(--ink);
+  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+body{min-height:100vh}
+.hidden{display:none!important}
+
+.match-shell{
+  width:min(1680px,calc(100% - 32px));
+  margin:20px auto;
+}
+
+.selection-panel{
+  margin-bottom:18px;
+  padding:22px 24px;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:rgba(12,17,24,.94);
+  box-shadow:0 28px 90px rgba(0,0,0,.24);
+}
+
+.selection-head .eyebrow{
+  margin:0 0 8px;
+  color:var(--red);
+  font-size:.78rem;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+
+.selection-head h1{
+  margin:0;
+  font-size:clamp(1.9rem,4vw,3.2rem);
+  line-height:1;
+  letter-spacing:-.05em;
+}
+
+.selection-copy{
+  margin:10px 0 0;
+  color:var(--muted);
+  font-size:1rem;
+}
+
+.selection-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-top:18px;
+}
+
+.field{
+  display:grid;
+  gap:8px;
+}
+
+.field span{
+  color:#cfd6df;
+  font-size:.88rem;
+  font-weight:800;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+}
+
+.field select{
+  min-height:50px;
+  padding:0 14px;
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:14px;
+  background:#121925;
+  color:#f7f8fb;
+  font:inherit;
+  font-size:1rem;
+}
+
+.selection-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:16px;
+}
+
+.selection-actions button{
+  min-height:44px;
+  padding:0 16px;
+  border:0;
+  border-radius:12px;
+  background:var(--red);
+  color:#fff;
+  font:inherit;
+  font-size:.92rem;
+  font-weight:850;
+  cursor:pointer;
+}
+
+.selection-actions button.secondary{
+  background:#151c27;
+  border:1px solid rgba(255,255,255,.12);
+}
+
+.selection-actions button:hover{filter:brightness(1.06)}
+
+.state-card{
+  max-width:760px;
+  margin:110px auto;
+  padding:28px;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:var(--surface);
+}
+
+.match-board{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+  align-items:stretch;
+}
+
+.team-column{
+  overflow:hidden;
+  min-height:880px;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:rgba(12,17,24,.94);
+  box-shadow:0 28px 90px rgba(0,0,0,.34);
+  display:flex;
+  flex-direction:column;
+}
+
+.team-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:20px 22px;
+  border-bottom:1px solid var(--line);
+  min-height:132px;
+}
+
+.team-brand{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  min-width:0;
+}
+
+.team-logo{
+  width:88px;
+  height:88px;
+  object-fit:contain;
+  flex:0 0 88px;
+}
+
+.team-head-copy{
+  min-width:0;
+}
+
+.team-eyebrow{
+  margin:0 0 5px;
+  color:var(--red);
+  font-size:.66rem;
+  font-weight:900;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+}
+
+.team-header h2{
+  margin:0;
+  font-size:clamp(1.45rem,2.2vw,2.45rem);
+  line-height:1;
+  letter-spacing:-.04em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.team-club{
+  margin:8px 0 0;
+  color:var(--muted);
+  font-size:.94rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.team-category{
+  flex:0 0 auto;
+  padding:10px 15px;
+  border:1px solid rgba(65,160,181,.35);
+  border-radius:999px;
+  background:rgba(65,160,181,.13);
+  color:#8dd7e7;
+  font-size:.82rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.roster-wrap{
+  padding:8px 16px 14px;
+  display:flex;
+  flex-direction:column;
+  flex:1 1 auto;
+}
+
+.roster-head,
+.roster-row{
+  display:grid;
+  grid-template-columns:64px minmax(115px,1fr) minmax(115px,1fr) 54px;
+  gap:10px;
+  align-items:center;
+}
+
+.roster-head{
+  padding:10px 10px 8px;
+  color:#798390;
+  font-size:.65rem;
+  font-weight:850;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.roster-body{
+  display:flex;
+  flex-direction:column;
+  flex:1 1 auto;
+}
+
+.roster-row{
+  min-height:46px;
+  padding:7px 10px;
+  border-top:1px solid var(--line);
+}
+
+.roster-row.placeholder{
+  opacity:.35;
+}
+
+.roster-number{
+  font-size:1rem;
+  font-weight:900;
+  font-variant-numeric:tabular-nums;
+}
+
+.roster-name{
+  font-size:.98rem;
+  font-weight:760;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.roster-first{
+  font-size:.94rem;
+  color:#d7dce4;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.role-badge{
+  display:inline-grid;
+  place-items:center;
+  width:34px;
+  min-height:25px;
+  border-radius:999px;
+  background:rgba(239,47,79,.15);
+  color:#ff7188;
+  font-size:.68rem;
+  font-weight:900;
+}
+
+.team-footer{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  padding:12px 20px;
+  border-top:1px solid var(--line);
+  color:#727c89;
+  font-size:.72rem;
+}
+
+.team-footer span:first-child{
+  color:var(--red);
+  font-weight:900;
+}
+
+/* Overlay mode for PRISM */
+html.overlay-mode,
+html.overlay-mode body{
+  width:100%;
+  min-height:100%;
+  background:transparent !important;
+}
+
+body[data-mode="overlay"]{
+  overflow:hidden;
+}
+
+body[data-mode="overlay"] .match-shell{
+  width:100vw;
+  height:100vh;
+  margin:0;
+  padding:2.4vh 2vw;
+}
+
+body[data-mode="overlay"] .selection-panel{
+  display:none;
+}
+
+body[data-mode="overlay"] .match-board{
+  width:100%;
+  height:100%;
+  gap:1.2vw;
+}
+
+body[data-mode="overlay"] .team-column{
+  min-height:0;
+  height:100%;
+  border-radius:24px;
+  background:linear-gradient(145deg, rgba(10,15,22,.97), rgba(16,22,31,.96));
+}
+
+body[data-mode="overlay"] .team-header{
+  padding:14px 16px;
+  min-height:108px;
+}
+
+body[data-mode="overlay"] .team-logo{
+  width:68px;
+  height:68px;
+  flex-basis:68px;
+}
+
+body[data-mode="overlay"] .team-eyebrow{
+  font-size:.54rem;
+  margin-bottom:4px;
+}
+
+body[data-mode="overlay"] .team-header h2{
+  font-size:clamp(1.1rem,2.0vw,1.95rem);
+}
+
+body[data-mode="overlay"] .team-club{
+  font-size:.78rem;
+  margin-top:5px;
+}
+
+body[data-mode="overlay"] .team-category{
+  padding:8px 11px;
+  font-size:.66rem;
+}
+
+body[data-mode="overlay"] .roster-wrap{
+  padding:4px 12px 8px;
+}
+
+body[data-mode="overlay"] .roster-head,
+body[data-mode="overlay"] .roster-row{
+  grid-template-columns:54px minmax(90px,1fr) minmax(88px,1fr) 40px;
+  gap:8px;
+}
+
+body[data-mode="overlay"] .roster-head{
+  padding:7px 8px 5px;
+  font-size:.54rem;
+}
+
+body[data-mode="overlay"] .roster-row{
+  min-height:calc((100vh - 210px) / 14);
+  padding:4px 8px;
+}
+
+body[data-mode="overlay"] .roster-number{
+  font-size:.84rem;
+}
+
+body[data-mode="overlay"] .roster-name{
+  font-size:.80rem;
+}
+
+body[data-mode="overlay"] .roster-first{
+  font-size:.76rem;
+}
+
+body[data-mode="overlay"] .role-badge{
+  width:30px;
+  min-height:22px;
+  font-size:.56rem;
+}
+
+body[data-mode="overlay"] .team-footer{
+  padding:8px 14px;
+  font-size:.60rem;
+}
+
+/* If height is smaller, compress a bit more but keep fixed two-column layout */
+@media (max-height: 820px){
+  body[data-mode="overlay"] .team-header{
+    min-height:96px;
+    padding:12px 14px;
+  }
+
+  body[data-mode="overlay"] .team-logo{
+    width:58px;
+    height:58px;
+    flex-basis:58px;
+  }
+
+  body[data-mode="overlay"] .roster-row{
+    min-height:calc((100vh - 188px) / 14);
+    padding:3px 7px;
+  }
+
+  body[data-mode="overlay"] .team-footer{
+    padding:6px 12px;
+  }
+}
+
+@media(max-width:980px){
+  .selection-grid,
+  .match-board{
+    grid-template-columns:1fr;
+  }
+
+  .team-column{
+    min-height:760px;
+  }
+}
+
+
+/* =========================================================
+   DUAL OVERLAY V1.1 - SMALLER CARDS / MORE SPACE BETWEEN
+   ========================================================= */
+
+body[data-mode="overlay"] .match-board{
+  width:100%;
+  height:100%;
+
+  grid-template-columns:
+    minmax(0, 40vw)
+    minmax(0, 40vw);
+
+  justify-content:center;
+  gap:4vw;
+}
+
+body[data-mode="overlay"] .team-column{
+  width:100%;
+  max-width:720px;
+  justify-self:center;
+}
+
+/* Keep the two cards comfortably separated on common 16:9 outputs */
+@media(min-width:1400px){
+  body[data-mode="overlay"] .match-board{
+    grid-template-columns:
+      minmax(0, 38vw)
+      minmax(0, 38vw);
+
+    gap:5vw;
+  }
+}
+
+@media(max-width:1100px){
+  body[data-mode="overlay"] .match-board{
+    grid-template-columns:
+      minmax(0, 44vw)
+      minmax(0, 44vw);
+
+    gap:2vw;
+  }
+}
+
+
+/* =========================================================
+   VISUAL REDESIGN - WATERMARK / MORE TRANSPARENT
+   ========================================================= */
+
+body[data-mode="overlay"] .team-column{
+  background:
+    linear-gradient(
+      145deg,
+      rgba(9,13,19,.88),
+      rgba(15,20,28,.91)
+    ) !important;
+
+  backdrop-filter: blur(8px) saturate(122%);
+  -webkit-backdrop-filter: blur(8px) saturate(122%);
+}
+
+body[data-mode="overlay"] .team-header{
+  background:linear-gradient(
+    180deg,
+    rgba(255,255,255,.03),
+    rgba(255,255,255,0)
+  );
+}
+
+body[data-mode="overlay"] .team-logo{
+  width:48px;
+  height:48px;
+  flex-basis:48px;
+  opacity:.56;
+}
+
+body[data-mode="overlay"] .team-brand{
+  gap:10px;
+}
+
+body[data-mode="overlay"] .roster-wrap{
+  position:relative;
+  isolation:isolate;
+}
+
+body[data-mode="overlay"] .roster-wrap::before{
+  content:"";
+  position:absolute;
+  inset:10px 6px 8px 6px;
+  z-index:0;
+  pointer-events:none;
+
+  background-image:var(--team-watermark);
+  background-repeat:no-repeat;
+  background-position:center 56%;
+  background-size:78% auto;
+
+  opacity:.09;
+  filter:grayscale(.06) brightness(1.03);
+}
+
+body[data-mode="overlay"] .roster-head,
+body[data-mode="overlay"] .roster-body,
+body[data-mode="overlay"] .roster-row{
+  position:relative;
+  z-index:1;
+}
+
+body[data-mode="overlay"] .roster-row{
+  background:rgba(255,255,255,.012);
+}
+
+body[data-mode="overlay"] .roster-row:nth-child(odd){
+  background:rgba(255,255,255,.026);
+}
+
+body[data-mode="overlay"] .team-footer{
+  background:linear-gradient(
+    0deg,
+    rgba(255,255,255,.03),
+    rgba(255,255,255,0)
+  );
+}
+
+
+/* =========================================================
+   MATCH SELECTOR V2
+   Club -> Team picker
+   ========================================================= */
+
+.selection-panel{
+  padding:26px;
+}
+
+.team-picker-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);
+  gap:18px;
+  align-items:center;
+  margin-top:24px;
+}
+
+.team-picker-card{
+  padding:18px;
+  border:1px solid rgba(255,255,255,.10);
+  border-radius:20px;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.045),
+      rgba(255,255,255,.018)
+    );
+}
+
+.picker-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:16px;
+}
+
+.picker-letter{
+  width:42px;
+  height:42px;
+  display:grid;
+  place-items:center;
+  flex:0 0 42px;
+  border-radius:13px;
+  background:rgba(239,47,79,.14);
+  border:1px solid rgba(239,47,79,.25);
+  color:#ff6d84;
+  font-size:1rem;
+  font-weight:900;
+}
+
+.team-b-picker .picker-letter{
+  background:rgba(65,160,181,.14);
+  border-color:rgba(65,160,181,.28);
+  color:#86d6e8;
+}
+
+.picker-title p{
+  margin:0 0 3px;
+  color:#8c98a7;
+  font-size:.70rem;
+  font-weight:850;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.picker-title strong{
+  display:block;
+  color:#fff;
+  font-size:1.05rem;
+}
+
+.picker-fields{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.picker-fields .field span{
+  font-size:.70rem;
+  color:#9da9b8;
+}
+
+.picker-fields select{
+  width:100%;
+  min-width:0;
+  min-height:47px;
+  padding:0 12px;
+  border-radius:12px;
+  background:#111823;
+  font-size:.91rem;
+}
+
+.picker-fields select:disabled{
+  opacity:.48;
+  cursor:not-allowed;
+}
+
+.team-preview{
+  display:grid;
+  grid-template-columns:62px minmax(0,1fr);
+  gap:12px;
+  align-items:center;
+  min-height:84px;
+  margin-top:14px;
+  padding:11px 12px;
+  border-radius:14px;
+  background:rgba(4,8,14,.30);
+  border:1px solid rgba(255,255,255,.065);
+}
+
+.preview-logo-shell{
+  width:62px;
+  height:62px;
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  background:rgba(255,255,255,.045);
+}
+
+.preview-logo-shell img{
+  width:52px;
+  height:52px;
+  object-fit:contain;
+}
+
+.preview-category{
+  display:inline-block;
+  margin-bottom:5px;
+  color:#78cadd;
+  font-size:.63rem;
+  font-weight:900;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.team-preview strong{
+  display:block;
+  color:#fff;
+  font-size:.96rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.team-preview small{
+  display:block;
+  margin-top:4px;
+  color:#98a4b2;
+  font-size:.76rem;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.versus{
+  width:52px;
+  height:52px;
+  display:grid;
+  place-items:center;
+  justify-self:center;
+  border-radius:50%;
+  background:#0d131d;
+  border:1px solid rgba(255,255,255,.10);
+  color:#c9d1dc;
+  font-size:.76rem;
+  font-weight:900;
+  letter-spacing:.08em;
+}
+
+.selection-message{
+  margin:14px 0 0;
+  padding:11px 13px;
+  border-radius:11px;
+  background:rgba(239,47,79,.10);
+  border:1px solid rgba(239,47,79,.18);
+  color:#ff899b;
+  font-size:.86rem;
+}
+
+.selection-actions{
+  justify-content:center;
+  margin-top:20px;
+}
+
+@media(max-width:980px){
+  .team-picker-grid{
+    grid-template-columns:1fr;
+  }
+
+  .versus{
+    margin:-2px auto;
+  }
+}
+
+@media(max-width:620px){
+  .selection-panel{
+    padding:18px;
+  }
+
+  .picker-fields{
+    grid-template-columns:1fr;
+  }
+
+  .team-preview{
+    grid-template-columns:54px minmax(0,1fr);
+  }
+
+  .preview-logo-shell{
+    width:54px;
+    height:54px;
+  }
+
+  .preview-logo-shell img{
+    width:46px;
+    height:46px;
+  }
+
+  .selection-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .selection-actions button{
+    width:100%;
+  }
+}
+
+
+/* =========================================================
+   OVERLAY RESTORE - WIDE / DARK / FULL 14 PLAYERS
+   Keeps the new selector panel, but restores the overlay
+   proportions that worked better visually.
+   ========================================================= */
+
+html.overlay-mode,
+html.overlay-mode body{
+  width:100%;
+  min-height:100%;
+  background:transparent !important;
+}
+
+body[data-mode="overlay"]{
+  overflow:hidden;
+}
+
+body[data-mode="overlay"] .match-shell{
+  width:100vw !important;
+  height:100vh !important;
+  margin:0 !important;
+  padding:1.4vh 2.2vw !important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:transparent;
+}
+
+body[data-mode="overlay"] .selection-panel{
+  display:none !important;
+}
+
+body[data-mode="overlay"] .match-board{
+  width:100% !important;
+  max-width:1720px !important;
+  height:min(94vh,860px) !important;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:28px !important;
+  align-items:stretch;
+}
+
+body[data-mode="overlay"] .team-column{
+  min-height:0 !important;
+  height:100% !important;
+  overflow:hidden;
+  border-radius:28px !important;
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10,14,20,.94),
+      rgba(18,23,31,.96)
+    ) !important;
+  border:1px solid rgba(255,255,255,.11) !important;
+  box-shadow:0 26px 80px rgba(0,0,0,.30) !important;
+  backdrop-filter:blur(8px) saturate(115%);
+  -webkit-backdrop-filter:blur(8px) saturate(115%);
+  display:flex;
+  flex-direction:column;
+}
+
+body[data-mode="overlay"] .team-header{
+  min-height:132px !important;
+  height:132px !important;
+  flex:0 0 132px !important;
+  padding:18px 24px !important;
+  gap:18px !important;
+  border-bottom:1px solid rgba(255,255,255,.10) !important;
+}
+
+body[data-mode="overlay"] .team-brand{
+  gap:16px !important;
+}
+
+body[data-mode="overlay"] .team-logo{
+  width:74px !important;
+  height:74px !important;
+  flex:0 0 74px !important;
+  opacity:.95 !important;
+}
+
+body[data-mode="overlay"] .team-eyebrow{
+  margin:0 0 6px !important;
+  color:#ff3f60 !important;
+  font-size:.75rem !important;
+  font-weight:900 !important;
+  letter-spacing:.11em !important;
+}
+
+body[data-mode="overlay"] .team-header h2{
+  margin:0 !important;
+  font-size:clamp(1.75rem,2.3vw,2.55rem) !important;
+  line-height:1 !important;
+}
+
+body[data-mode="overlay"] .team-club{
+  margin:9px 0 0 !important;
+  color:#d2d8e1 !important;
+  font-size:1rem !important;
+}
+
+body[data-mode="overlay"] .team-category{
+  padding:10px 16px !important;
+  background:rgba(42,117,145,.18) !important;
+  border:1px solid rgba(92,199,230,.36) !important;
+  color:#9be8fb !important;
+  font-size:.85rem !important;
+}
+
+body[data-mode="overlay"] .roster-wrap{
+  position:relative;
+  isolation:isolate;
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  padding:7px 18px 8px !important;
+  overflow:hidden !important;
+}
+
+body[data-mode="overlay"] .roster-wrap::before{
+  content:"";
+  position:absolute;
+  inset:10px 14px 8px 14px;
+  z-index:0;
+  pointer-events:none;
+  background-image:var(--team-watermark);
+  background-repeat:no-repeat;
+  background-position:center 56%;
+  background-size:64% auto;
+  opacity:.075;
+  filter:brightness(1.03);
+}
+
+body[data-mode="overlay"] .roster-head,
+body[data-mode="overlay"] .roster-body,
+body[data-mode="overlay"] .roster-row{
+  position:relative;
+  z-index:1;
+}
+
+body[data-mode="overlay"] .roster-head,
+body[data-mode="overlay"] .roster-row{
+  grid-template-columns:76px minmax(150px,1fr) minmax(150px,1fr) 72px !important;
+  gap:12px !important;
+}
+
+body[data-mode="overlay"] .roster-head{
+  min-height:48px !important;
+  padding:12px 10px 8px !important;
+  color:#c0cad7 !important;
+  font-size:.72rem !important;
+  font-weight:900 !important;
+  letter-spacing:.09em !important;
+}
+
+body[data-mode="overlay"] .roster-body{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+}
+
+body[data-mode="overlay"] .roster-row{
+  min-height:41px !important;
+  height:41px !important;
+  padding:5px 10px !important;
+  border-top:1px solid rgba(255,255,255,.085) !important;
+  background:rgba(255,255,255,.012) !important;
+}
+
+body[data-mode="overlay"] .roster-row:nth-child(odd){
+  background:rgba(255,255,255,.022) !important;
+}
+
+body[data-mode="overlay"] .roster-number{
+  color:#fff !important;
+  font-size:1.02rem !important;
+  font-weight:900 !important;
+}
+
+body[data-mode="overlay"] .roster-name{
+  color:#fff !important;
+  font-size:1rem !important;
+  font-weight:820 !important;
+}
+
+body[data-mode="overlay"] .roster-first{
+  color:#eef4fb !important;
+  font-size:.98rem !important;
+  font-weight:560 !important;
+}
+
+body[data-mode="overlay"] .role-badge{
+  width:36px !important;
+  min-height:25px !important;
+  background:rgba(239,47,79,.22) !important;
+  color:#ff8498 !important;
+}
+
+body[data-mode="overlay"] .team-footer{
+  min-height:38px !important;
+  height:38px !important;
+  flex:0 0 38px !important;
+  padding:9px 18px !important;
+  color:#8d98a7 !important;
+  border-top:1px solid rgba(255,255,255,.09) !important;
+}
+
+/* 1080p: keep all 14 player slots + footer visible */
+@media (min-height:900px){
+  body[data-mode="overlay"] .match-board{
+    height:min(92vh,900px) !important;
+  }
+
+  body[data-mode="overlay"] .roster-row{
+    min-height:44px !important;
+    height:44px !important;
+  }
+}
+
+/* Smaller preview/browser windows: shrink vertically, not horizontally */
+@media (max-height:899px){
+  body[data-mode="overlay"] .match-shell{
+    padding:1vh 2vw !important;
+  }
+
+  body[data-mode="overlay"] .match-board{
+    height:97vh !important;
+  }
+
+  body[data-mode="overlay"] .team-header{
+    min-height:118px !important;
+    height:118px !important;
+    flex-basis:118px !important;
+  }
+
+  body[data-mode="overlay"] .team-logo{
+    width:66px !important;
+    height:66px !important;
+    flex-basis:66px !important;
+  }
+
+  body[data-mode="overlay"] .roster-head{
+    min-height:42px !important;
+    padding:9px 10px 6px !important;
+  }
+
+  body[data-mode="overlay"] .roster-row{
+    min-height:38px !important;
+    height:38px !important;
+    padding:4px 10px !important;
+  }
+
+  body[data-mode="overlay"] .team-footer{
+    min-height:34px !important;
+    height:34px !important;
+    flex-basis:34px !important;
+    padding:7px 18px !important;
+  }
+}
