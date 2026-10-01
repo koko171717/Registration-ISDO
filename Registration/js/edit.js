@@ -1,0 +1,438 @@
+const db=window.isdoSupabase;
+const $=id=>document.getElementById(id);
+
+const state={
+ token:"",
+ clubs:[],
+ categories:[],
+ teams:[],
+ access:[],
+ mealDays:[],
+ sandwichOptions:[],
+ registration:null
+};
+
+const e={
+ loading:$("editLoading"),
+ fatal:$("editFatal"),
+ fatalMessage:$("editFatalMessage"),
+ form:$("editForm"),
+ success:$("editSuccess"),
+ first:$("firstName"),
+ last:$("lastName"),
+ birth:$("birthDate"),
+ nationality:$("nationality"),
+ email:$("email"),
+ jersey:$("jerseyNumber"),
+ origin:$("originClub"),
+ cat1:$("category1"),
+ team1:$("team1"),
+ toggle2:$("secondCategoryToggle"),
+ block2:$("team2Block"),
+ cat2:$("category2"),
+ team2:$("team2"),
+ meals:$("mealChoices"),
+ mealTotal:$("mealTotal"),
+ confirmation:$("confirmation"),
+ save:$("saveButton"),
+ error:$("editError"),
+ again:$("editAgainButton")
+};
+
+document.addEventListener("DOMContentLoaded",init);
+
+async function init(){
+ state.token=new URLSearchParams(location.search).get("token")||"";
+
+ if(!state.token){
+  return fatal("This edit link is incomplete.");
+ }
+
+ try{
+  const [reference,registration]=await Promise.all([
+   loadReferenceData(),
+   loadRegistration()
+  ]);
+
+  state.registration=registration;
+
+  renderClubs();
+  renderMeals();
+  bind();
+  populateRegistration();
+
+  e.loading.classList.add("hidden");
+  e.form.classList.remove("hidden");
+
+ }catch(err){
+  console.error(err);
+  fatal(err.message||"This registration could not be loaded.");
+ }
+}
+
+async function loadReferenceData(){
+ const qs=await Promise.all([
+  db.from("clubs").select("id,name,country,active").eq("active",true).order("name"),
+  db.from("categories").select("id,name"),
+  db.from("teams").select("id,managing_club_id,category_id,display_name,active").eq("active",true),
+  db.from("team_origin_club_access").select("team_id,origin_club_id"),
+  db.from("meal_days").select("id,name,event_date,price_chf,active").eq("active",true).order("event_date"),
+  db.from("sandwich_options").select("id,name,sort_order,active").eq("active",true).order("sort_order")
+ ]);
+
+ const badResult=qs.find(x=>x.error);
+ if(badResult)throw badResult.error;
+
+ [
+  state.clubs,
+  state.categories,
+  state.teams,
+  state.access,
+  state.mealDays,
+  state.sandwichOptions
+ ]=qs.map(x=>x.data||[]);
+}
+
+async function loadRegistration(){
+ const response=await fetch(
+  `/api/edit-player?token=${encodeURIComponent(state.token)}`
+ );
+
+ const result=await response.json();
+
+ if(!response.ok){
+  throw new Error(result.error||"This registration could not be loaded.");
+ }
+
+ return result;
+}
+
+function bind(){
+ e.origin.onchange=()=>{
+  resetTeams();
+  renderCategories(e.cat1);
+ };
+
+ e.cat1.onchange=()=>{
+  renderTeams(e.team1,e.cat1.value);
+
+  if(e.toggle2.checked){
+   renderCategories(e.cat2,e.cat1.value);
+   e.team2.innerHTML='<option value="">Select a team</option>';
+   e.team2.disabled=true;
+  }
+ };
+
+ e.toggle2.onchange=()=>{
+  e.block2.classList.toggle("hidden",!e.toggle2.checked);
+
+  if(e.toggle2.checked){
+   renderCategories(e.cat2,e.cat1.value);
+  }else{
+   e.cat2.value="";
+   e.team2.innerHTML='<option value="">Select a team</option>';
+   e.team2.disabled=true;
+  }
+ };
+
+ e.cat2.onchange=()=>renderTeams(e.team2,e.cat2.value);
+ e.form.onsubmit=save;
+ e.again.onclick=()=>{
+  e.success.classList.add("hidden");
+  e.form.classList.remove("hidden");
+  e.confirmation.checked=false;
+  scrollTo({top:0,behavior:"smooth"});
+ };
+}
+
+function populateRegistration(){
+ const p=state.registration.player;
+
+ e.first.value=p.first_name||"";
+ e.last.value=p.last_name||"";
+ e.birth.value=p.birth_date||"";
+ e.nationality.value=p.nationality||"";
+ e.email.value=p.email||"";
+ e.jersey.value=p.jersey_number||"";
+ e.origin.value=p.origin_club_id||"";
+
+ renderCategories(e.cat1);
+
+ const memberships=[...(state.registration.memberships||[])]
+  .sort((a,b)=>Number(a.membership_order)-Number(b.membership_order));
+
+ if(memberships[0]){
+  const team=state.teams.find(t=>t.id===memberships[0].team_id);
+  if(team){
+   e.cat1.value=team.category_id;
+   renderTeams(e.team1,team.category_id);
+   e.team1.value=team.id;
+  }
+ }
+
+ if(memberships[1]){
+  const team=state.teams.find(t=>t.id===memberships[1].team_id);
+  if(team){
+   e.toggle2.checked=true;
+   e.block2.classList.remove("hidden");
+   renderCategories(e.cat2,e.cat1.value);
+   e.cat2.value=team.category_id;
+   renderTeams(e.team2,team.category_id);
+   e.team2.value=team.id;
+  }
+ }
+
+ for(const day of state.mealDays){
+  const current=(state.registration.meals||[])
+   .find(m=>m.meal_day_id===day.id);
+
+  const select=$("meal-"+day.id);
+
+  if(current?.ordered&&current.sandwich_option_id){
+   select.value=current.sandwich_option_id;
+  }else{
+   select.value="";
+  }
+ }
+
+ mealTotal();
+}
+
+function renderClubs(){
+ e.origin.innerHTML='<option value="">Select your club</option>';
+ state.clubs.forEach(c=>e.origin.add(new Option(c.name,c.id)));
+}
+
+function resetTeams(){
+ e.cat1.innerHTML='<option value="">Select a category</option>';
+ e.team1.innerHTML='<option value="">Select a team</option>';
+ e.cat2.innerHTML='<option value="">Select a category</option>';
+ e.team2.innerHTML='<option value="">Select a team</option>';
+
+ e.cat1.disabled=!e.origin.value;
+ e.team1.disabled=true;
+ e.team2.disabled=true;
+}
+
+function allowedTeams(){
+ const ids=new Set(
+  state.access
+   .filter(a=>a.origin_club_id===e.origin.value)
+   .map(a=>a.team_id)
+ );
+
+ return state.teams.filter(t=>ids.has(t.id));
+}
+
+function renderCategories(select,exclude=""){
+ const ids=new Set(allowedTeams().map(t=>t.category_id));
+
+ select.innerHTML='<option value="">Select a category</option>';
+
+ state.categories
+  .filter(c=>ids.has(c.id)&&c.id!==exclude)
+  .sort((a,b)=>({Men:1,Women:2,Mixed:3}[a.name]||9)-({Men:1,Women:2,Mixed:3}[b.name]||9))
+  .forEach(c=>select.add(new Option(c.name,c.id)));
+
+ select.disabled=!e.origin.value;
+}
+
+function teamName(t){
+ return t.display_name||
+  state.clubs.find(c=>c.id===t.managing_club_id)?.name||
+  "Team";
+}
+
+function renderTeams(select,categoryId){
+ select.innerHTML='<option value="">Select a team</option>';
+
+ if(!categoryId){
+  select.disabled=true;
+  return;
+ }
+
+ const teams=allowedTeams()
+  .filter(t=>t.category_id===categoryId)
+  .sort((a,b)=>teamName(a).localeCompare(teamName(b)));
+
+ teams.forEach(t=>select.add(new Option(teamName(t),t.id)));
+
+ select.disabled=false;
+
+ if(teams.length===1){
+  select.value=teams[0].id;
+ }
+}
+
+function renderMeals(){
+ e.meals.innerHTML="";
+
+ state.mealDays.forEach(day=>{
+  const div=document.createElement("div");
+  div.className="meal-card";
+
+  const select=document.createElement("select");
+  select.id="meal-"+day.id;
+  select.add(new Option("No meal",""));
+
+  state.sandwichOptions.forEach(option=>{
+   select.add(new Option(option.name,option.id));
+  });
+
+  select.onchange=mealTotal;
+
+  div.innerHTML="<h3>"+esc(day.name)+"</h3>";
+  div.appendChild(select);
+
+  e.meals.appendChild(div);
+ });
+
+ mealTotal();
+}
+
+function mealTotal(){
+ let total=0;
+
+ state.mealDays.forEach(day=>{
+  if($("meal-"+day.id)?.value){
+   total+=Number(day.price_chf);
+  }
+ });
+
+ e.mealTotal.textContent=
+  "CHF "+(Number.isInteger(total)?total+".–":total.toFixed(2));
+}
+
+function validate(){
+ clearError();
+
+ for(const input of[
+  e.first,e.last,e.birth,e.nationality,e.email
+ ]){
+  if(!input.reportValidity())return false;
+ }
+
+ if(!e.origin.value||!e.cat1.value||!e.team1.value){
+  return showError(
+   "Please select your club, first category and first team."
+  );
+ }
+
+ if(
+  e.toggle2.checked&&
+  (!e.cat2.value||!e.team2.value)
+ ){
+  return showError(
+   "Please complete your second category and team."
+  );
+ }
+
+ if(!e.confirmation.checked){
+  return showError(
+   "Please confirm that the updated information is correct."
+  );
+ }
+
+ return true;
+}
+
+function payload(){
+ const memberships=[
+  {
+   team_id:e.team1.value,
+   membership_order:1
+  }
+ ];
+
+ if(e.toggle2.checked){
+  memberships.push({
+   team_id:e.team2.value,
+   membership_order:2
+  });
+ }
+
+ return{
+  token:state.token,
+  player:{
+   first_name:e.first.value.trim(),
+   last_name:e.last.value.trim(),
+   birth_date:e.birth.value,
+   nationality:e.nationality.value.trim(),
+   email:e.email.value.trim().toLowerCase(),
+   jersey_number:e.jersey.value.trim()||null,
+   origin_club_id:e.origin.value
+  },
+  memberships,
+  meals:state.mealDays.map(day=>{
+   const select=$("meal-"+day.id);
+
+   return{
+    meal_day_id:day.id,
+    sandwich_option_id:select.value||null,
+    ordered:!!select.value
+   };
+  })
+ };
+}
+
+async function save(event){
+ event.preventDefault();
+
+ if(!validate())return;
+
+ e.save.disabled=true;
+ e.save.textContent="Saving…";
+
+ try{
+  const response=await fetch("/api/edit-player",{
+   method:"PATCH",
+   headers:{"Content-Type":"application/json"},
+   body:JSON.stringify(payload())
+  });
+
+  const result=await response.json();
+
+  if(!response.ok){
+   throw new Error(result.error||"The changes could not be saved.");
+  }
+
+  state.registration=await loadRegistration();
+
+  e.form.classList.add("hidden");
+  e.success.classList.remove("hidden");
+  scrollTo({top:0,behavior:"smooth"});
+
+ }catch(err){
+  showError(err.message);
+ }finally{
+  e.save.disabled=false;
+  e.save.textContent="Save changes";
+ }
+}
+
+function fatal(message){
+ e.loading.classList.add("hidden");
+ e.form.classList.add("hidden");
+ e.fatal.classList.remove("hidden");
+ e.fatalMessage.textContent=message;
+}
+
+function showError(message){
+ e.error.textContent=message;
+ e.error.classList.remove("hidden");
+ return false;
+}
+
+function clearError(){
+ e.error.classList.add("hidden");
+ e.error.textContent="";
+}
+
+function esc(v){
+ return String(v??"")
+  .replaceAll("&","&amp;")
+  .replaceAll("<","&lt;")
+  .replaceAll(">","&gt;")
+  .replaceAll('"',"&quot;")
+  .replaceAll("'","&#039;");
+}
