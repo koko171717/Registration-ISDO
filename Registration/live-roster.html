@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ISDO'27 Live Roster</title>
+  <link rel="stylesheet" href="/css/live-roster.css">
+</head>
+<body>
+  <main class="live-shell">
+    <section id="loading" class="state-card">Loading roster…</section>
+
+    <section id="errorView" class="state-card hidden">
+      <h1>Roster unavailable</h1>
+      <p id="errorMessage"></p>
+    </section>
+
+    <section id="rosterView" class="roster-board hidden">
+      <header class="roster-header">
+        <div class="brand-block">
+          <img src="/assets/isdo27-logo.png" alt="ISDO'27" class="live-logo">
+          <div>
+            <p class="eyebrow">International Sharks Dodgeball Open</p>
+            <h1 id="teamName">Team</h1>
+            <p id="clubName" class="club-name">Club</p>
+          </div>
+        </div>
+
+        <div class="category-badge" id="category">Category</div>
+      </header>
+
+      <section class="roster-list-wrap">
+        <div class="roster-table-head">
+          <span>#</span>
+          <span>Last name</span>
+          <span>First name</span>
+          <span>Role</span>
+        </div>
+
+        <div id="players" class="roster-list"></div>
+      </section>
+
+      <footer class="live-footer">
+        <span>ISDO'27</span>
+        <span>Morges · Switzerland</span>
+      </footer>
+    </section>
+  </main>
+
+  <script src="/js/live-roster.js"></script>
+</body>
+</html>
