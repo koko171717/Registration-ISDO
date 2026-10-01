@@ -925,21 +925,19 @@ function payload(){
         }
       ),
 
-    legal_acceptances:
-      state.legalDocuments.map(
-        document=>({
+   legal_acceptances:
+  state.legalDocuments.map(
+    legalDocument=>({
 
-          legal_document_id:
-            document.id,
+      legal_document_id:
+        legalDocument.id,
 
-          accepted:
-            !!document.querySelector(
-              `[data-legal-id="${document.id}"]`
-            )?.checked
-        })
-      )
-  };
-}
+      accepted:
+        !!window.document.querySelector(
+          `[data-legal-id="${legalDocument.id}"]`
+        )?.checked
+    })
+  )
 
 async function submitForm(ev){
 
