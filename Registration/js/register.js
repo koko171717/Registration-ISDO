@@ -1,7 +1,7 @@
 const db=window.isdoSupabase;
 const state={step:1,clubs:[],categories:[],teams:[],access:[],mealDays:[],sandwichOptions:[],legalDocuments:[]};
 const $=id=>document.getElementById(id);
-const e={form:$('registrationForm'),loading:$('loading'),fatal:$('fatal'),fatalMessage:$('fatalMessage'),success:$('success'),progressFill:$('progressFill'),progressText:$('progressText'),back:$('backButton'),next:$('nextButton'),submit:$('submitButton'),error:$('formError'),type:$('participantType'),first:$('firstName'),last:$('lastName'),birth:$('birthDate'),nationality:$('nationality'),email:$('email'),jersey:$('jerseyNumber'),jerseyField:$('jerseyField'),origin:$('originClub'),clubTeamsTitle:$('clubTeamsTitle'),playerTeamsBlock:$('playerTeamsBlock'),nonPlayerClubInfo:$('nonPlayerClubInfo'),cat1:$('category1'),team1:$('team1'),toggle2:$('secondCategoryToggle'),block2:$('team2Block'),cat2:$('category2'),team2:$('team2'),meals:$('mealChoices'),mealTotal:$('mealTotal'),legal:$('legalDocuments'),review:$('reviewContent'),confirm:$('finalConfirmation'),editLink:$('editLink'),copyEditLink:$('copyEditLink'),emailSuccess:$('emailSuccess'),emailWarning:$('emailWarning')};
+const e={form:$('registrationForm'),loading:$('loading'),fatal:$('fatal'),fatalMessage:$('fatalMessage'),success:$('success'),progressFill:$('progressFill'),progressText:$('progressText'),back:$('backButton'),next:$('nextButton'),submit:$('submitButton'),error:$('formError'),type:$('participantType'),first:$('firstName'),last:$('lastName'),birth:$('birthDate'),nationality:$('nationality'),email:$('email'),jersey:$('jerseyNumber'),jerseyField:$('jerseyField'),origin:$('originClub'),clubTeamsTitle:$('clubTeamsTitle'),clubTeamsDescription:$('clubTeamsDescription'),originClubLabel:$('originClubLabel'),playerTeamsBlock:$('playerTeamsBlock'),cat1:$('category1'),team1:$('team1'),toggle2:$('secondCategoryToggle'),block2:$('team2Block'),cat2:$('category2'),team2:$('team2'),meals:$('mealChoices'),mealTotal:$('mealTotal'),legal:$('legalDocuments'),review:$('reviewContent'),confirm:$('finalConfirmation'),editLink:$('editLink'),copyEditLink:$('copyEditLink'),emailSuccess:$('emailSuccess'),emailWarning:$('emailWarning')};
 document.addEventListener('DOMContentLoaded',init);
 
 async function init(){
@@ -36,8 +36,13 @@ function applyParticipantType(){
  const player=isPlayer();
  e.jerseyField.classList.toggle('hidden',!player);
  e.playerTeamsBlock.classList.toggle('hidden',!player);
- e.nonPlayerClubInfo.classList.toggle('hidden',player);
  e.clubTeamsTitle.textContent=player?'2. Club & teams':'2. Club';
+ e.clubTeamsDescription.textContent=player
+  ?'Select your club of origin and the category or categories in which you will play.'
+  :'Which club are you coming with?';
+ e.originClubLabel.innerHTML=player
+  ?'Club of origin <em>*</em>'
+  :'Club <em>*</em>';
  e.cat1.required=player;e.team1.required=player;
  if(!player){e.jersey.value='';e.toggle2.checked=false;e.block2.classList.add('hidden');resetTeams()}
  else if(e.origin.value){renderCategories(e.cat1)}
