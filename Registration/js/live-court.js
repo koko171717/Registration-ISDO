@@ -44,8 +44,8 @@ async function refreshCourt(){
     });
 
     if(fingerprint !== lastFingerprint){
-      renderTeam("team1", result.team1, result.team1_players || []);
-      renderTeam("team2", result.team2, result.team2_players || []);
+      renderTeam("team1", result.team1, result.team1_players || [], result.team1_coaches || []);
+      renderTeam("team2", result.team2, result.team2_players || [], result.team2_coaches || []);
       lastFingerprint = fingerprint;
     }
 
@@ -61,7 +61,7 @@ function hideOverlay(){
   $("matchView").classList.add("hidden");
 }
 
-function renderTeam(prefix, team, players){
+function renderTeam(prefix, team, players, coaches=[]){
   $(`${prefix}Name`).textContent = team.team_name;
   $(`${prefix}Club`).textContent = team.club_name;
   $(`${prefix}Category`).textContent = team.category;
@@ -83,6 +83,8 @@ function renderTeam(prefix, team, players){
 
   renderAdaptiveRoster($(`${prefix}Players`), players);
 }
+
+function renderCoachStrip(prefix, coaches){const card=$(`${prefix}Card`);let strip=card?.querySelector('.coach-strip-live');if(!strip&&card){strip=document.createElement('div');strip.className='coach-strip-live';const header=card.querySelector('.team-header');header?.insertAdjacentElement('afterend',strip)}if(!strip)return;strip.classList.toggle('hidden',!coaches.length);strip.innerHTML=coaches.length?`<span class="coach-label">Coach${coaches.length>1?'es':''}</span><span>${coaches.map(c=>esc(`${c.first_name} ${c.last_name}`)).join(' · ')}</span>`:'';}
 
 function renderAdaptiveRoster(container, players){
   container.innerHTML = "";

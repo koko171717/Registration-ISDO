@@ -49,6 +49,8 @@ function bindEvents() {
 
   $("addTeamCategory").onchange = renderAddTeamOptions;
   $("addTeamButton").onclick = addTeamToPlayer;
+  $("addCoachAssignmentButton").onclick = addCoachAssignment;
+  $("editParticipantType").onchange = updateParticipantTypeUI;
 
   const refreshBroadcastButton = $("refreshBroadcastButton");
   if (refreshBroadcastButton) {
@@ -319,7 +321,7 @@ function renderPlayers() {
   currentPlayers = filteredPlayers();
 
   $("playersCount").textContent =
-    `${currentPlayers.length} players`;
+    `${currentPlayers.length} registrations`;
 
   $("playersBody").innerHTML = currentPlayers
     .map(
@@ -327,6 +329,7 @@ function renderPlayers() {
         <tr>
           <td>
             <b>${escapeHtml(player.first_name)} ${escapeHtml(player.last_name)}</b>
+            <span class="badge participant-type">${escapeHtml(participantTypeLabel(player.participant_type))}</span>
           </td>
 
           <td>#${escapeHtml(player.jersey_number || "—")}</td>
@@ -380,10 +383,13 @@ window.openPlayer = function openPlayer(id) {
 
   $("editFirstName").value = selectedPlayer.first_name;
   $("editLastName").value = selectedPlayer.last_name;
+  $("editParticipantType").value = selectedPlayer.participant_type || "player";
   $("editJersey").value = selectedPlayer.jersey_number || "";
   $("editOriginClub").value = selectedPlayer.origin_club_id;
 
+  updateParticipantTypeUI();
   renderPlayerTeamsEditor();
+  renderCoachAssignmentsEditor();
   $("playerDialog").showModal();
 };
 
@@ -403,6 +409,8 @@ function availableTeamsForSelectedPlayer() {
 }
 
 function renderPlayerTeamsEditor() {
+  const editor = document.querySelector(".player-teams-editor:not(#coachAssignmentsEditor)");
+  if (editor) editor.classList.toggle("hidden", (selectedPlayer.participant_type || "player") !== "player");
   const container = $("currentPlayerTeams");
 
   container.innerHTML = "";
@@ -642,7 +650,9 @@ async function refreshSelectedPlayer() {
   renderTeams();
 
   if (selectedPlayer) {
+    updateParticipantTypeUI();
     renderPlayerTeamsEditor();
+    renderCoachAssignmentsEditor();
   }
 }
 
@@ -653,6 +663,7 @@ async function savePlayer(event) {
     method: "PATCH",
     body: JSON.stringify({
       player_id: selectedPlayer.id,
+      participant_type: $("editParticipantType").value,
       first_name: $("editFirstName").value.trim(),
       last_name: $("editLastName").value.trim(),
       jersey_number: $("editJersey").value.trim() || null,
@@ -687,6 +698,12 @@ async function deletePlayer() {
   $("playerDialog").close();
   await load();
 }
+
+function participantTypeLabel(type){return type==='coach'?'Coach':type==='other'?'Accompanying / Other':'Player';}
+function updateParticipantTypeUI(){const type=$("editParticipantType").value;$("editJerseyField").classList.toggle("hidden",type!=="player");if(type!=="player")$("editJersey").value="";const teamEditor=document.querySelector(".player-teams-editor:not(#coachAssignmentsEditor)");if(teamEditor)teamEditor.classList.toggle("hidden",type!=="player");}
+function renderCoachAssignmentsEditor(){if(!selectedPlayer)return;const box=$("currentCoachAssignments");const assignments=selectedPlayer.coach_teams||[];box.innerHTML="";if(!assignments.length){box.innerHTML=`<p class="muted">${selectedPlayer.participant_type==='coach'?'Club coach by default — currently shown for all teams of this club.':'No team coaching assignment.'}</p>`;}else{assignments.forEach(a=>{const row=document.createElement("div");row.className="current-team-row";row.innerHTML=`<div class="current-team-info"><span class="badge role">${escapeHtml(a.category)}</span><strong>${escapeHtml(a.team_name)}</strong></div><button type="button" class="mini-danger">Remove</button>`;row.querySelector("button").onclick=()=>removeCoachAssignment(a.assignment_id);box.appendChild(row)})}const select=$("addCoachTeam");select.innerHTML='<option value="">Select team</option>';const used=new Set(assignments.map(a=>a.team_id));data.teams.slice().sort((a,b)=>`${a.managing_club_name} ${a.category} ${a.team_name}`.localeCompare(`${b.managing_club_name} ${b.category} ${b.team_name}`)).filter(t=>!used.has(t.id)).forEach(t=>select.add(new Option(`${t.managing_club_name} · ${t.category} — ${t.team_name}`,t.id)));$("coachAssignmentHelp").textContent=selectedPlayer.participant_type==='coach'?(assignments.length?'This club coach is now team-specific and will appear only on assigned teams.':'Club coach by default: appears on all teams of the club until a specific team assignment is added.'):'Players and other registrations appear as coaches only on teams assigned here.';}
+async function addCoachAssignment(){const teamId=$("addCoachTeam").value;if(!teamId){$("coachEditMessage").textContent="Select a team first.";return}try{$("coachEditMessage").textContent="Adding coach…";await api("/api/admin-coach-assignment",{method:"POST",body:JSON.stringify({participant_id:selectedPlayer.id,team_id:teamId})});await refreshSelectedPlayer();$("coachEditMessage").textContent="Coach assignment added."}catch(e){$("coachEditMessage").textContent=e.message}}
+async function removeCoachAssignment(assignmentId){try{await api("/api/admin-coach-assignment",{method:"DELETE",body:JSON.stringify({assignment_id:assignmentId})});await refreshSelectedPlayer();$("coachEditMessage").textContent="Coach assignment removed."}catch(e){$("coachEditMessage").textContent=e.message}}
 
 function renderMeals() {
   if (!data) {

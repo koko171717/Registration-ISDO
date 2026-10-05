@@ -14,6 +14,7 @@ function bind(){
   $("closeDialog").onclick=()=>$("dialog").close();
   $("captainBtn").onclick=()=>role("captain");
   $("viceBtn").onclick=()=>role("vice_captain");
+  $("coachBtn").onclick=toggleCoach;
   $("removeBtn").onclick=remove;
 
   db.auth.onAuthStateChange((_e,s)=>{
@@ -104,14 +105,20 @@ function render(d){
         </div>
       </button>
 
-      <div class="roster-details hidden"></div>
+      <div class="roster-details hidden">
+        <div class="team-coaches"></div>
+        <div class="team-players-list"></div>
+      </div>
     `;
 
     const button=card.querySelector(".roster-summary-button");
     const details=card.querySelector(".roster-details");
 
+    const coachBox=details.querySelector(".team-coaches");
+    const playerList=details.querySelector(".team-players-list");
+    coachBox.innerHTML=team.coaches?.length?`<div class="coach-strip"><strong>Coach${team.coaches.length>1?'es':''}</strong><span>${team.coaches.map(c=>esc(c.first_name+' '+c.last_name)).join(' · ')}</span></div>`:'';
     if(sortedPlayers.length===0){
-      details.innerHTML=`<div class="empty-roster">No registered players yet.</div>`;
+      playerList.innerHTML=`<div class="empty-roster">No registered players yet.</div>`;
     } else {
       sortedPlayers.forEach(player=>{
         const row=document.createElement("div");
@@ -144,7 +151,7 @@ function render(d){
         `;
 
         row.onclick=()=>openPlayer(team,player);
-        details.appendChild(row);
+        playerList.appendChild(row);
       });
     }
 
@@ -175,6 +182,7 @@ function openPlayer(t,p){
   $("dMeals").textContent=p.meals_complete?"Completed":"Missing";
   $("captainBtn").textContent=p.captain?"Remove captain":"Set as captain";
   $("viceBtn").textContent=p.vice_captain?"Remove vice-captain":"Set as vice-captain";
+  $("coachBtn").textContent=p.is_team_coach?"Remove team coach":"Set as team coach";
   $("dialog").showModal();
 }
 
@@ -190,6 +198,8 @@ async function role(field){
   $("dialog").close();
   load();
 }
+
+async function toggleCoach(){await api("/api/manager-coach-assignment",{method:selected.p.is_team_coach?"DELETE":"POST",body:JSON.stringify({team_id:selected.t.id,participant_id:selected.p.id})});$("dialog").close();load();}
 
 async function remove(){
   if(!confirm(`Remove ${selected.p.first_name} ${selected.p.last_name} from ${selected.t.team_name}?`)) return;
