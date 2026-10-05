@@ -266,3 +266,62 @@ dialog{
 }
 
 .coach-strip{display:flex;gap:12px;align-items:center;padding:12px 20px;background:#f3f5fb;border-bottom:1px solid #e8eaf0;font-size:.92rem}.coach-strip strong{color:#4254a3;text-transform:uppercase;letter-spacing:.05em;font-size:.75rem}.coach-strip span{font-weight:700}
+
+
+/* Team coach manager */
+.team-coach-manager{
+  padding:14px 18px;
+  border-bottom:1px solid #eef0f3;
+  background:#fbfbfd;
+}
+.coach-add-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:10px;
+  align-items:end;
+  margin-top:10px;
+}
+.coach-add-row label{margin:0}
+.coach-add-row select{width:100%}
+.coach-add-row button{white-space:nowrap}
+.coach-action-message{
+  min-height:18px;
+  margin:8px 0 0;
+  color:#6d7380;
+  font-size:.86rem;
+}
+.coach-strip-managed{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+.coach-chip-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
+}
+.coach-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 8px 5px 10px;
+  border-radius:999px;
+  background:#eef1ff;
+  color:#36438f;
+  font-weight:800;
+}
+.coach-chip button{
+  width:22px;
+  min-height:22px;
+  padding:0;
+  margin:0;
+  border-radius:50%;
+  background:transparent;
+  color:inherit;
+  box-shadow:none;
+}
+@media(max-width:760px){
+  .coach-add-row{grid-template-columns:1fr}
+  .coach-add-row button{width:100%}
+}
