@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ISDO'27 Player Registration</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <main class="app">
+
+    <header class="hero">
+      <div class="hero-brand">
+        <div class="logo-shell">
+          <img
+            src="/assets/isdo27-logo.png"
+            alt="International Sharks Dodgeball Open logo"
+            class="event-logo"
+          >
+        </div>
+
+        <div class="hero-copy">
+          <p class="eyebrow">International Sharks Dodgeball Open</p>
+          <h1>Player Registration</h1>
+          <p class="hero-subtitle">ISDO'27 · Morges, Switzerland</p>
+        </div>
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-track">
+          <span id="progressFill"></span>
+        </div>
+
+        <div class="progress-meta">
+          <span id="progressText">Step 1 of 5</span>
+          <span class="progress-sections">PLAYER · TEAM · LUNCH · LEGAL · REVIEW</span>
+        </div>
+      </div>
+    </header>
+
+    <section id="loading" class="card loading-card">
+      Loading registration data…
+    </section>
+
+    <section id="fatal" class="card hidden">
+      <div class="section-kicker">Registration</div>
+      <h2>Registration unavailable</h2>
+      <p id="fatalMessage"></p>
+    </section>
+
+    <form id="registrationForm" class="hidden" novalidate>
+
+      <section class="step card" data-step="1">
+        <div class="section-heading">
+          <div class="step-number">01</div>
+          <div>
+            <p class="section-kicker">Player details</p>
+            <h2>Personal information</h2>
+            <p class="section-description">
+              Enter the information that will be used for your ISDO'27 registration.
+            </p>
+          </div>
+        </div>
+
+        <div class="grid two form-grid">
+          <label>
+            <span>First name <em>*</em></span>
+            <input id="firstName" required autocomplete="given-name">
+          </label>
+
+          <label>
+            <span>Last name <em>*</em></span>
+            <input id="lastName" required autocomplete="family-name">
+          </label>
+
+          <label>
+            <span>Date of birth <em>*</em></span>
+            <input id="birthDate" type="date" required>
+          </label>
+
+          <label>
+            <span>Nationality <em>*</em></span>
+            <input id="nationality" required autocomplete="country-name">
+          </label>
+
+          <label>
+            <span>Email <em>*</em></span>
+            <input id="email" type="email" required autocomplete="email">
+          </label>
+
+          <label>
+            <span>Jersey number</span>
+            <input id="jerseyNumber" inputmode="numeric">
+          </label>
+        </div>
+      </section>
+
+      <section class="step card hidden" data-step="2">
+        <div class="section-heading">
+          <div class="step-number blue">02</div>
+          <div>
+            <p class="section-kicker">Roster</p>
+            <h2>Club & teams</h2>
+            <p class="section-description">
+              Select your club of origin and the category or categories in which you will play.
+            </p>
+          </div>
+        </div>
+
+        <label class="club-field">
+          <span>Club of origin <em>*</em></span>
+          <select id="originClub" required>
+            <option value="">Select your club</option>
+          </select>
+        </label>
+
+        <div class="team-box team-box-primary">
+          <div class="team-box-header">
+            <div>
+              <span class="team-tag">Category 1</span>
+              <h3>Primary team</h3>
+            </div>
+            <span class="team-accent red"></span>
+          </div>
+
+          <div class="grid two">
+            <label>
+              <span>Category <em>*</em></span>
+              <select id="category1" required disabled>
+                <option value="">Select a category</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Team <em>*</em></span>
+              <select id="team1" required disabled>
+                <option value="">Select a team</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <label class="check second-category-check">
+          <input id="secondCategoryToggle" type="checkbox">
+          <span>
+            <strong>I play in a second category</strong>
+            <small>Add another roster for ISDO'27.</small>
+          </span>
+        </label>
+
+        <div id="team2Block" class="team-box hidden">
+          <div class="team-box-header">
+            <div>
+              <span class="team-tag">Category 2</span>
+              <h3>Second team</h3>
+            </div>
+            <span class="team-accent green"></span>
+          </div>
+
+          <div class="grid two">
+            <label>
+              <span>Category <em>*</em></span>
+              <select id="category2">
+                <option value="">Select a category</option>
+              </select>
+            </label>
+
+            <label>
+              <span>Team <em>*</em></span>
+              <select id="team2" disabled>
+                <option value="">Select a team</option>
+              </select>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="step card hidden" data-step="3">
+        <div class="section-heading">
+          <div class="step-number green">03</div>
+          <div>
+            <p class="section-kicker">Lunch</p>
+            <h2>Lunch options</h2>
+            <p class="section-description">
+              Choose your lunch for each tournament day.
+            </p>
+          </div>
+        </div>
+
+        <div class="info lunch-info">
+          <div class="info-icon">🥪</div>
+          <div>
+            <p>
+              Each lunch includes <strong>1 sandwich, 1 drink, chips, chocolate and fruit.</strong>
+            </p>
+            <p>
+              Select <strong>No meal</strong> if you do not want lunch on a specific day.
+            </p>
+            <p class="price-note">CHF 10.– per day</p>
+            <p class="small-note">
+              Sandwich quantities not ordered in advance may be limited and cannot be guaranteed during the event.
+            </p>
+          </div>
+        </div>
+
+        <div id="mealChoices" class="grid three meals-grid"></div>
+
+        <div class="total">
+          <span>Lunch total</span>
+          <strong id="mealTotal">CHF 0.–</strong>
+        </div>
+      </section>
+
+      <section class="step card hidden" data-step="4">
+        <div class="section-heading">
+          <div class="step-number purple">04</div>
+          <div>
+            <p class="section-kicker">Legal</p>
+            <h2>Legal acknowledgements</h2>
+            <p class="section-description">
+              Please read each document before confirming your acceptance.
+            </p>
+          </div>
+        </div>
+
+        <div id="legalDocuments"></div>
+      </section>
+
+      <section class="step card hidden" data-step="5">
+        <div class="section-heading">
+          <div class="step-number dark">05</div>
+          <div>
+            <p class="section-kicker">Final check</p>
+            <h2>Review your registration</h2>
+            <p class="section-description">
+              Check your information before submitting your ISDO'27 registration.
+            </p>
+          </div>
+        </div>
+
+        <div id="reviewContent" class="review-grid"></div>
+
+        <label class="check final-check">
+          <input id="finalConfirmation" type="checkbox" required>
+          <span>
+            <strong>I confirm that the information provided above is correct.</strong>
+            <small>You will receive a private edit link after registration.</small>
+          </span>
+        </label>
+      </section>
+
+      <div class="actions">
+        <button id="backButton" type="button" class="secondary hidden">
+          Back
+        </button>
+
+        <div class="actions-spacer"></div>
+
+        <button id="nextButton" type="button">
+          Continue
+        </button>
+
+        <button id="submitButton" type="submit" class="hidden">
+          Submit registration
+        </button>
+      </div>
+
+      <p id="formError" class="error hidden"></p>
+    </form>
+
+    <section id="success" class="card success-card hidden">
+      <div class="success-icon">✓</div>
+      <p class="section-kicker">ISDO'27</p>
+      <h2>Registration completed</h2>
+      <p class="success-lead">Your registration has been saved successfully.</p>
+
+      <div id="emailSuccess" class="info success-info hidden">
+        <p><strong>A confirmation email has been sent to your email address.</strong></p>
+        <p>Please also check your spam or junk folder if you do not see it within a few minutes.</p>
+      </div>
+
+      <div id="emailWarning" class="info warning-info hidden">
+        <p><strong>Your registration is confirmed, but the confirmation email could not be sent.</strong></p>
+        <p>Please save your private edit link below so you can update your registration later.</p>
+      </div>
+
+      <div class="edit-link-card">
+        <span class="edit-link-label">YOUR PRIVATE EDIT LINK</span>
+        <h3>Save this link</h3>
+        <p>
+          You can use it later to update your personal information, teams or lunch choices without creating an account.
+        </p>
+        <p class="privacy-note">
+          Keep it private — anyone who has this link can edit your registration.
+        </p>
+
+        <p class="edit-link-wrap">
+          <a id="editLink" href="#" target="_blank" rel="noopener"></a>
+        </p>
+
+        <button id="copyEditLink" type="button" class="secondary">
+          Copy link
+        </button>
+      </div>
+
+      <div class="organizer-help">
+        <strong>Need help?</strong>
+        <span>
+          If you have any problem with your registration or edit link, please contact the tournament organizer.
+        </span>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <span>ISDO'27</span>
+      <span>International Sharks Dodgeball Open</span>
+      <span>Morges · Switzerland</span>
+    </footer>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/supabase.js"></script>
+  <script src="/js/register.js"></script>
+</body>
+</html>
