@@ -91,10 +91,10 @@ function renderCoachStrip(prefix, coaches){const card=$(`${prefix}Card`);let str
 
 function renderAdaptiveRoster(container, players){
   container.innerHTML = "";
-  container.classList.toggle("two-columns", players.length > 16);
+  container.classList.toggle("two-columns", players.length >= 12);
   container.classList.toggle("dense", players.length > 24);
 
-  const columnCount = players.length > 16 ? 2 : 1;
+  const columnCount = players.length >= 12 ? 2 : 1;
   const perColumn = Math.ceil(players.length / columnCount);
 
   for(let columnIndex = 0; columnIndex < columnCount; columnIndex++){
