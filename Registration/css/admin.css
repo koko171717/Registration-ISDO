@@ -1156,3 +1156,7 @@ dialog::backdrop {
     align-self:flex-start;
   }
 }
+
+.badge.participant-type{margin-left:7px;background:#eef1f6;color:#4b5563;font-size:.7rem;vertical-align:middle}
+#coachAssignmentsEditor{margin-top:22px}
+#coachAssignmentsEditor .add-team-panel label{display:block}

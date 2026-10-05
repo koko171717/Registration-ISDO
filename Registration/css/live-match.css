@@ -1278,3 +1278,5 @@ body[data-mode="overlay"] .roster-body.two-columns{
     max-height:none !important;
   }
 }
+
+.coach-strip-live{position:relative;z-index:2;display:flex;align-items:center;gap:10px;padding:7px 20px 6px;border-bottom:1px solid rgba(255,255,255,.08);font-size:clamp(11px,1vw,15px);font-weight:700;min-height:30px}.coach-strip-live.hidden{display:none}.coach-label{font-size:.72em;text-transform:uppercase;letter-spacing:.09em;opacity:.62;font-weight:900;white-space:nowrap}
