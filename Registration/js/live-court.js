@@ -40,7 +40,9 @@ async function refreshCourt(){
       team1: result.team1,
       team2: result.team2,
       team1_players: result.team1_players,
-      team2_players: result.team2_players
+      team2_players: result.team2_players,
+      team1_coaches: result.team1_coaches,
+      team2_coaches: result.team2_coaches
     });
 
     if(fingerprint !== lastFingerprint){
@@ -81,6 +83,7 @@ function renderTeam(prefix, team, players, coaches=[]){
     );
   }
 
+  renderCoachStrip(prefix, coaches || []);
   renderAdaptiveRoster($(`${prefix}Players`), players);
 }
 

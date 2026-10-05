@@ -86,7 +86,6 @@ function render(d){
     const sortedPlayers=[...team.players].sort((a,b)=>{
       const an=jerseyNumber(a.jersey_number);
       const bn=jerseyNumber(b.jersey_number);
-
       if(an!==bn) return an-bn;
       return `${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`);
     });
@@ -97,7 +96,6 @@ function render(d){
           <span class="badge role">${esc(team.category)}</span>
           <h2>${esc(team.team_name)}</h2>
         </div>
-
         <div class="roster-summary-count">
           <strong>${sortedPlayers.length}</strong>
           <span>${sortedPlayers.length===1?"player":"players"}</span>
@@ -106,17 +104,62 @@ function render(d){
       </button>
 
       <div class="roster-details hidden">
-        <div class="team-coaches"></div>
+        <section class="team-coach-manager">
+          <div class="team-coaches"></div>
+          <div class="coach-add-row">
+            <label>
+              Set coach
+              <select class="coach-candidate-select">
+                <option value="">Select a player or coach…</option>
+              </select>
+            </label>
+            <button type="button" class="secondary add-coach-button">+ Add coach</button>
+          </div>
+          <p class="coach-action-message"></p>
+        </section>
         <div class="team-players-list"></div>
       </div>
     `;
 
     const button=card.querySelector(".roster-summary-button");
     const details=card.querySelector(".roster-details");
-
     const coachBox=details.querySelector(".team-coaches");
+    const coachSelect=details.querySelector(".coach-candidate-select");
+    const addCoachButton=details.querySelector(".add-coach-button");
+    const coachMessage=details.querySelector(".coach-action-message");
     const playerList=details.querySelector(".team-players-list");
-    coachBox.innerHTML=team.coaches?.length?`<div class="coach-strip"><strong>Coach${team.coaches.length>1?'es':''}</strong><span>${team.coaches.map(c=>esc(c.first_name+' '+c.last_name)).join(' · ')}</span></div>`:'';
+
+    renderTeamCoaches(team,coachBox);
+
+    const currentCoachIds=new Set((team.coaches||[]).map(c=>c.id));
+    (team.coach_candidates||[])
+      .filter(p=>!currentCoachIds.has(p.id))
+      .forEach(p=>{
+        const type=p.participant_type==="coach"?"Coach":"Player";
+        const jersey=p.jersey_number?` · #${p.jersey_number}`:"";
+        coachSelect.add(new Option(`${p.last_name} ${p.first_name} · ${type}${jersey}`,p.id));
+      });
+
+    addCoachButton.disabled=coachSelect.options.length<=1;
+    addCoachButton.onclick=async()=>{
+      const participantId=coachSelect.value;
+      if(!participantId) return;
+      try{
+        coachMessage.textContent="Adding coach…";
+        await api("/api/manager-roster",{
+          method:"POST",
+          body:JSON.stringify({
+            action:"add_coach_assignment",
+            team_id:team.id,
+            participant_id:participantId
+          })
+        });
+        await load();
+      }catch(e){
+        coachMessage.textContent=e.message;
+      }
+    };
+
     if(sortedPlayers.length===0){
       playerList.innerHTML=`<div class="empty-roster">No registered players yet.</div>`;
     } else {
@@ -125,7 +168,6 @@ function render(d){
         row.className="player roster-player-row";
         row.innerHTML=`
           <div class="jersey-cell">#${esc(player.jersey_number||"—")}</div>
-
           <div class="player-main">
             <b>${esc(player.first_name)} ${esc(player.last_name)}</b>
             ${
@@ -136,20 +178,17 @@ function render(d){
                   : ''
             }
           </div>
-
           <div class="mobileHide">
             <span class="badge ${player.registration_complete?'ok':'warn'}">
               ${player.registration_complete?'Complete':'Incomplete'}
             </span>
           </div>
-
           <div class="mobileHide">
             <span class="badge ${player.meals_complete?'ok':'warn'}">
               ${player.meals_complete?'Meals ✓':'Meals missing'}
             </span>
           </div>
         `;
-
         row.onclick=()=>openPlayer(team,player);
         playerList.appendChild(row);
       });
@@ -163,6 +202,48 @@ function render(d){
     };
 
     box.appendChild(card);
+  });
+}
+
+function renderTeamCoaches(team,box){
+  const coaches=team.coaches||[];
+  if(!coaches.length){
+    box.innerHTML=`<div class="coach-strip"><strong>Coaches</strong><span>No coach assigned</span></div>`;
+    return;
+  }
+
+  box.innerHTML=`
+    <div class="coach-strip coach-strip-managed">
+      <strong>Coach${coaches.length>1?"es":""}</strong>
+      <div class="coach-chip-list"></div>
+    </div>
+  `;
+
+  const list=box.querySelector(".coach-chip-list");
+  coaches.forEach(coach=>{
+    const chip=document.createElement("span");
+    chip.className="coach-chip";
+    chip.innerHTML=`
+      <span>${esc(coach.first_name)} ${esc(coach.last_name)}</span>
+      <button type="button" title="Remove coach from ${esc(team.team_name)}">×</button>
+    `;
+    chip.querySelector("button").onclick=async ev=>{
+      ev.stopPropagation();
+      try{
+        await api("/api/manager-roster",{
+          method:"POST",
+          body:JSON.stringify({
+            action:"remove_coach_assignment",
+            team_id:team.id,
+            participant_id:coach.id
+          })
+        });
+        await load();
+      }catch(e){
+        alert(e.message);
+      }
+    };
+    list.appendChild(chip);
   });
 }
 
@@ -182,7 +263,9 @@ function openPlayer(t,p){
   $("dMeals").textContent=p.meals_complete?"Completed":"Missing";
   $("captainBtn").textContent=p.captain?"Remove captain":"Set as captain";
   $("viceBtn").textContent=p.vice_captain?"Remove vice-captain":"Set as vice-captain";
-  $("coachBtn").textContent=p.is_team_coach?"Remove team coach":"Set as team coach";
+  $("coachBtn").textContent=p.is_team_coach
+    ?`Remove coach of ${t.team_name} — ${t.category}`
+    :`Set as coach of ${t.team_name} — ${t.category}`;
   $("dialog").showModal();
 }
 
@@ -199,16 +282,25 @@ async function role(field){
   load();
 }
 
-async function toggleCoach(){await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:selected.p.is_team_coach?"remove_coach_assignment":"add_coach_assignment",team_id:selected.t.id,participant_id:selected.p.id})});$("dialog").close();load();}
+async function toggleCoach(){
+  await api("/api/manager-roster",{
+    method:"POST",
+    body:JSON.stringify({
+      action:selected.p.is_team_coach?"remove_coach_assignment":"add_coach_assignment",
+      team_id:selected.t.id,
+      participant_id:selected.p.id
+    })
+  });
+  $("dialog").close();
+  load();
+}
 
 async function remove(){
   if(!confirm(`Remove ${selected.p.first_name} ${selected.p.last_name} from ${selected.t.team_name}?`)) return;
-
   await api("/api/manager-membership",{
     method:"DELETE",
     body:JSON.stringify({membership_id:selected.p.membership_id})
   });
-
   $("dialog").close();
   load();
 }
