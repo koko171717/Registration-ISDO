@@ -7,135 +7,65 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/edit.css">
 </head>
-
 <body>
 <main class="app">
-
-  <header class="hero edit-hero">
-    <div class="hero-brand">
-      <div class="logo-shell">
-        <img
-          src="/assets/isdo27-logo.png"
-          alt="International Sharks Dodgeball Open logo"
-          class="event-logo"
-        >
-      </div>
-
-      <div class="hero-copy">
-        <p class="eyebrow">International Sharks Dodgeball Open</p>
-        <h1>Edit Registration</h1>
-        <p class="hero-subtitle">
-          Update your ISDO'27 registration using your private link.
-        </p>
-      </div>
-    </div>
-
-    <div class="edit-hero-note">
-      <span class="private-dot"></span>
-      Private registration link
-    </div>
+  <header>
+    <p class="eyebrow">International Sharks Dodgeball Open</p>
+    <h1>Edit Registration</h1>
+    <p class="muted">Use your private link to update your ISDO 2027 registration.</p>
   </header>
 
-  <section id="editLoading" class="card edit-state-card">
-    Loading your registration…
-  </section>
+  <section id="editLoading" class="card">Loading your registration…</section>
 
-  <section id="editFatal" class="card edit-state-card hidden">
-    <div class="section-heading compact-heading">
-      <div class="step-number dark">!</div>
-      <div>
-        <p class="section-kicker">Private registration</p>
-        <h2>Unable to open registration</h2>
-        <p id="editFatalMessage" class="section-description"></p>
-      </div>
-    </div>
+  <section id="editFatal" class="card hidden">
+    <h2>Unable to open registration</h2>
+    <p id="editFatalMessage"></p>
   </section>
 
   <form id="editForm" class="hidden" novalidate>
-
     <section class="card">
-      <div class="section-heading">
-        <div class="step-number">01</div>
-        <div>
-          <p class="section-kicker">Player details</p>
-          <h2>Personal information</h2>
-          <p class="section-description">
-            Update the personal information linked to your ISDO'27 registration.
-          </p>
-        </div>
-      </div>
+      <h2>1. Personal information</h2>
 
-      <div class="grid two form-grid">
-        <label>
-          <span>First name <em>*</em></span>
-          <input id="firstName" required autocomplete="given-name">
-        </label>
+      <label>Registration type *
+        <select id="participantType" required>
+          <option value="player">Player</option>
+          <option value="coach">Coach</option>
+          <option value="other">Accompanying / Other</option>
+        </select>
+      </label>
 
-        <label>
-          <span>Last name <em>*</em></span>
-          <input id="lastName" required autocomplete="family-name">
-        </label>
-
-        <label>
-          <span>Date of birth <em>*</em></span>
-          <input id="birthDate" type="date" required>
-        </label>
-
-        <label>
-          <span>Nationality <em>*</em></span>
-          <input id="nationality" required autocomplete="country-name">
-        </label>
-
-        <label>
-          <span>Email <em>*</em></span>
-          <input id="email" type="email" required autocomplete="email">
-        </label>
-
-        <label>
-          <span>Jersey number</span>
-          <input id="jerseyNumber" inputmode="numeric">
-        </label>
+      <div class="grid two">
+        <label>First name *<input id="firstName" required></label>
+        <label>Last name *<input id="lastName" required></label>
+        <label>Date of birth *<input id="birthDate" type="date" required></label>
+        <label>Nationality *<input id="nationality" required></label>
+        <label>Email *<input id="email" type="email" required></label>
+        <label id="jerseyField">Jersey number<input id="jerseyNumber"></label>
       </div>
     </section>
 
     <section class="card">
-      <div class="section-heading">
-        <div class="step-number blue">02</div>
-        <div>
-          <p class="section-kicker">Roster</p>
-          <h2>Club & teams</h2>
-          <p class="section-description">
-            Change your club of origin or the category and team in which you are registered.
-          </p>
-        </div>
-      </div>
+      <h2 id="clubTeamsTitle">2. Club & teams</h2>
 
-      <label class="club-field">
-        <span>Club of origin <em>*</em></span>
+      <label>Club of origin *
         <select id="originClub" required>
           <option value="">Select your club</option>
         </select>
       </label>
 
-      <div class="team-box team-box-primary">
-        <div class="team-box-header">
-          <div>
-            <span class="team-tag">Category 1</span>
-            <h3>Primary team</h3>
-          </div>
-          <span class="team-accent red"></span>
-        </div>
-
+      <div id="playerTeamsBlock">
+      <div class="team-box">
+        <h3>Category 1</h3>
         <div class="grid two">
           <label>
-            <span>Category <em>*</em></span>
+            Category *
             <select id="category1" required disabled>
               <option value="">Select a category</option>
             </select>
           </label>
 
           <label>
-            <span>Team <em>*</em></span>
+            Team *
             <select id="team1" required disabled>
               <option value="">Select a team</option>
             </select>
@@ -143,67 +73,47 @@
         </div>
       </div>
 
-      <label class="check second-category-check">
+      <label class="check">
         <input id="secondCategoryToggle" type="checkbox">
-        <span>
-          <strong>I play in a second category</strong>
-          <small>Add, change or remove your second roster.</small>
-        </span>
+        I play in a second category
       </label>
 
       <div id="team2Block" class="team-box hidden">
-        <div class="team-box-header">
-          <div>
-            <span class="team-tag">Category 2</span>
-            <h3>Second team</h3>
-          </div>
-          <span class="team-accent green"></span>
-        </div>
-
+        <h3>Category 2</h3>
         <div class="grid two">
           <label>
-            <span>Category <em>*</em></span>
+            Category *
             <select id="category2">
               <option value="">Select a category</option>
             </select>
           </label>
 
           <label>
-            <span>Team <em>*</em></span>
+            Team *
             <select id="team2" disabled>
               <option value="">Select a team</option>
             </select>
           </label>
         </div>
       </div>
+      </div>
+      <div id="nonPlayerClubInfo" class="info hidden">
+        <p>No team selection is required for this registration type.</p>
+        <p>Team-specific coaching assignments are managed by your club manager or tournament admin.</p>
+      </div>
     </section>
 
     <section class="card">
-      <div class="section-heading">
-        <div class="step-number green">03</div>
-        <div>
-          <p class="section-kicker">Lunch</p>
-          <h2>Lunch options</h2>
-          <p class="section-description">
-            Update your sandwich choice for each tournament day.
-          </p>
-        </div>
+      <h2>3. 🥪 Lunch Options – ISDO 2027</h2>
+
+      <div class="info">
+        <p>Each lunch includes 1 sandwich of your choice, 1 drink, chips, chocolate and fruit.</p>
+        <p>If you do not wish to order lunch on a specific day, select <strong>No meal</strong>.</p>
+        <p><strong>💰 Lunch price: CHF 10.– per day</strong></p>
+        <p><strong>Payment:</strong> Lunches ordered through this form must be paid during the tournament at the bar, either in cash (Swiss francs – CHF) or by card.</p>
       </div>
 
-      <div class="info lunch-info">
-        <div class="info-icon">🥪</div>
-        <div>
-          <p>
-            Each lunch includes <strong>1 sandwich, 1 drink, chips, chocolate and fruit.</strong>
-          </p>
-          <p>
-            Select <strong>No meal</strong> if you do not want lunch on a specific day.
-          </p>
-          <p class="price-note">CHF 10.– per day</p>
-        </div>
-      </div>
-
-      <div id="mealChoices" class="grid three meals-grid"></div>
+      <div id="mealChoices" class="grid three"></div>
 
       <div class="total">
         <span>Lunch total</span>
@@ -211,76 +121,32 @@
       </div>
     </section>
 
-    <section class="card save-card">
-      <div class="section-heading">
-        <div class="step-number purple">04</div>
-        <div>
-          <p class="section-kicker">Confirmation</p>
-          <h2>Save changes</h2>
-          <p class="section-description">
-            Review your updates before saving them.
-          </p>
-        </div>
+    <section class="card">
+      <h2>4. Save changes</h2>
+      <div class="info">
+        <p>Your previous legal acknowledgements remain attached to your registration.</p>
+        <p>Changes to team selection may remove any captain or vice-captain assignment previously set for you.</p>
       </div>
 
-      <div class="info edit-warning">
-        <div class="info-icon">i</div>
-        <div>
-          <p>Your previous legal acknowledgements remain attached to your registration.</p>
-          <p>
-            Changes to team selection may remove any captain or vice-captain assignment
-            previously set for you.
-          </p>
-        </div>
-      </div>
-
-      <label class="check final-check">
+      <label class="check">
         <input id="confirmation" type="checkbox" required>
-        <span>
-          <strong>I confirm that the updated information is correct.</strong>
-          <small>Your existing private edit link will remain valid after saving.</small>
-        </span>
+        I confirm that the updated information is correct.
       </label>
     </section>
 
-    <div class="actions edit-actions">
-      <div class="actions-spacer"></div>
-      <button id="saveButton" type="submit">
-        Save changes
-      </button>
+    <div class="actions">
+      <button id="saveButton" type="submit">Save changes</button>
     </div>
 
     <p id="editError" class="error hidden"></p>
   </form>
 
-  <section id="editSuccess" class="card success-card hidden">
-    <div class="success-icon">✓</div>
-    <p class="section-kicker">ISDO'27</p>
-    <h2>Registration updated</h2>
-    <p class="success-lead">
-      Your changes have been saved successfully.
-    </p>
-
-    <div class="info success-info">
-      <p>
-        <strong>You can keep using the same private link.</strong>
-      </p>
-      <p>
-        Return to it whenever you need to update your registration again.
-      </p>
-    </div>
-
-    <button id="editAgainButton" type="button" class="secondary">
-      Edit again
-    </button>
+  <section id="editSuccess" class="card hidden">
+    <h2>✓ Registration updated</h2>
+    <p>Your changes have been saved successfully.</p>
+    <p>You can keep using the same private link if you need to make another change later.</p>
+    <button id="editAgainButton" type="button" class="secondary">Edit again</button>
   </section>
-
-  <footer class="site-footer">
-    <span>ISDO'27</span>
-    <span>International Sharks Dodgeball Open</span>
-    <span>Morges · Switzerland</span>
-  </footer>
-
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

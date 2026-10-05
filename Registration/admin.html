@@ -213,7 +213,8 @@
     <div class="grid two">
       <label><span>First name</span><input id="editFirstName" required></label>
       <label><span>Last name</span><input id="editLastName" required></label>
-      <label><span>Jersey number</span><input id="editJersey"></label>
+      <label><span>Registration type</span><select id="editParticipantType"><option value="player">Player</option><option value="coach">Coach</option><option value="other">Accompanying / Other</option></select></label>
+      <label id="editJerseyField"><span>Jersey number</span><input id="editJersey"></label>
       <label><span>Origin club</span><select id="editOriginClub"></select></label>
     </div>
 
@@ -234,6 +235,21 @@
 
         <button type="button" id="addTeamButton" class="secondary">+ Add team</button>
         <p id="teamEditMessage" class="team-edit-message muted"></p>
+      </div>
+    </section>
+
+
+    <section class="player-teams-editor" id="coachAssignmentsEditor">
+      <div class="team-editor-title">
+        <p class="section-kicker">Staff</p>
+        <h3>Coaching assignments</h3>
+        <p class="muted" id="coachAssignmentHelp">A registered Coach belongs to the club by default. Add team assignments only when the coach should be team-specific. Players can also be assigned as coaches.</p>
+      </div>
+      <div id="currentCoachAssignments" class="current-player-teams"></div>
+      <div class="add-team-panel">
+        <label><span>Assign as coach to team</span><select id="addCoachTeam"><option value="">Select team</option></select></label>
+        <button type="button" id="addCoachAssignmentButton" class="secondary">+ Add coaching assignment</button>
+        <p id="coachEditMessage" class="team-edit-message muted"></p>
       </div>
     </section>
 

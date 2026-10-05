@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ISDO'27 Player Registration</title>
+  <title>ISDO'27 Registration</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -22,7 +22,7 @@
 
         <div class="hero-copy">
           <p class="eyebrow">International Sharks Dodgeball Open</p>
-          <h1>Player Registration</h1>
+          <h1>Registration</h1>
           <p class="hero-subtitle">ISDO'27 · Morges, Switzerland</p>
         </div>
       </div>
@@ -34,7 +34,7 @@
 
         <div class="progress-meta">
           <span id="progressText">Step 1 of 5</span>
-          <span class="progress-sections">PLAYER · TEAM · LUNCH · LEGAL · REVIEW</span>
+          <span class="progress-sections">DETAILS · CLUB · LUNCH · LEGAL · REVIEW</span>
         </div>
       </div>
     </header>
@@ -55,13 +55,22 @@
         <div class="section-heading">
           <div class="step-number">01</div>
           <div>
-            <p class="section-kicker">Player details</p>
+            <p class="section-kicker">Registration details</p>
             <h2>Personal information</h2>
             <p class="section-description">
               Enter the information that will be used for your ISDO'27 registration.
             </p>
           </div>
         </div>
+
+        <label class="club-field">
+          <span>Registration type <em>*</em></span>
+          <select id="participantType" required>
+            <option value="player">Player</option>
+            <option value="coach">Coach</option>
+            <option value="other">Accompanying / Other</option>
+          </select>
+        </label>
 
         <div class="grid two form-grid">
           <label>
@@ -89,7 +98,7 @@
             <input id="email" type="email" required autocomplete="email">
           </label>
 
-          <label>
+          <label id="jerseyField">
             <span>Jersey number</span>
             <input id="jerseyNumber" inputmode="numeric">
           </label>
@@ -101,7 +110,7 @@
           <div class="step-number blue">02</div>
           <div>
             <p class="section-kicker">Roster</p>
-            <h2>Club & teams</h2>
+            <h2 id="clubTeamsTitle">Club & teams</h2>
             <p class="section-description">
               Select your club of origin and the category or categories in which you will play.
             </p>
@@ -115,6 +124,7 @@
           </select>
         </label>
 
+        <div id="playerTeamsBlock">
         <div class="team-box team-box-primary">
           <div class="team-box-header">
             <div>
@@ -174,6 +184,15 @@
             </label>
           </div>
         </div>
+        </div>
+
+        <div id="nonPlayerClubInfo" class="info hidden">
+          <div class="info-icon">ℹ️</div>
+          <div>
+            <p><strong>No team selection is required for this registration type.</strong></p>
+            <p>Coaches are linked to their club by default. Team-specific coaching assignments can be managed later by the club manager or tournament admin.</p>
+          </div>
+        </div>
       </section>
 
       <section class="step card hidden" data-step="3">
@@ -198,6 +217,7 @@
               Select <strong>No meal</strong> if you do not want lunch on a specific day.
             </p>
             <p class="price-note">CHF 10.– per day</p>
+            <p><strong>Payment:</strong> lunches ordered through this form must be paid during the tournament at the bar, either in cash (Swiss francs – CHF) or by card.</p>
             <p class="small-note">
               Sandwich quantities not ordered in advance may be limited and cannot be guaranteed during the event.
             </p>
