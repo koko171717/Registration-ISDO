@@ -199,7 +199,7 @@ async function role(field){
   load();
 }
 
-async function toggleCoach(){await api("/api/manager-coach-assignment",{method:selected.p.is_team_coach?"DELETE":"POST",body:JSON.stringify({team_id:selected.t.id,participant_id:selected.p.id})});$("dialog").close();load();}
+async function toggleCoach(){await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:selected.p.is_team_coach?"remove_coach_assignment":"add_coach_assignment",team_id:selected.t.id,participant_id:selected.p.id})});$("dialog").close();load();}
 
 async function remove(){
   if(!confirm(`Remove ${selected.p.first_name} ${selected.p.last_name} from ${selected.t.team_name}?`)) return;
