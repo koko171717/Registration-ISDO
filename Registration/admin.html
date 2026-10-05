@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ISDO'27 Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+<main class="app admin-app">
+
+<section id="loginView" class="admin-login-wrap">
+  <header class="hero admin-hero">
+    <div class="hero-brand">
+      <div class="logo-shell">
+        <img src="/assets/isdo27-logo.png" alt="International Sharks Dodgeball Open logo" class="event-logo">
+      </div>
+      <div class="hero-copy">
+        <p class="eyebrow">International Sharks Dodgeball Open</p>
+        <h1>Admin</h1>
+        <p class="hero-subtitle">Private tournament administration</p>
+      </div>
+    </div>
+  </header>
+
+  <section class="card auth-card admin-auth">
+    <div class="section-heading">
+      <div class="step-number purple">→</div>
+      <div>
+        <p class="section-kicker">Private access</p>
+        <h2>Administrator sign in</h2>
+        <p class="section-description">Sign in with an authorized ISDO'27 administrator account.</p>
+      </div>
+    </div>
+
+    <form id="loginForm" class="admin-login-form">
+      <label><span>Email</span><input id="loginEmail" type="email" required autocomplete="email"></label>
+      <label><span>Password</span><input id="loginPassword" type="password" required autocomplete="current-password"></label>
+      <button type="submit" class="admin-login-button">Sign in</button>
+    </form>
+
+    <p id="loginMessage" class="message hidden"></p>
+
+    <div class="admin-login-note">
+      <span class="private-dot"></span>
+      Restricted access for ISDO'27 administration.
+    </div>
+  </section>
+</section>
+
+<section id="appView" class="hidden">
+  <header class="hero admin-dashboard-hero">
+    <div class="admin-dashboard-top">
+      <div class="hero-brand">
+        <div class="logo-shell">
+          <img src="/assets/isdo27-logo.png" alt="International Sharks Dodgeball Open logo" class="event-logo">
+        </div>
+        <div class="hero-copy">
+          <p class="eyebrow">ISDO'27 Admin</p>
+          <h1>Registration Console</h1>
+          <p id="adminEmail" class="hero-subtitle"></p>
+        </div>
+      </div>
+      <button id="logoutButton" class="admin-logout">Sign out</button>
+    </div>
+    <div class="admin-hero-bottom"><span class="private-dot"></span>Tournament administration</div>
+  </header>
+
+  <nav class="tabs admin-tabs">
+    <button class="tab active" data-view="overview">Overview</button>
+    <button class="tab" data-view="players">Players</button>
+    <button class="tab" data-view="meals">Meals</button>
+    <button class="tab" data-view="teams">Teams</button>
+    <button class="tab" data-view="broadcast">Broadcast</button>
+  </nav>
+
+  <section id="overviewView" class="view">
+    <div class="admin-section-heading">
+      <p class="section-kicker">Dashboard</p>
+      <h2>Overview</h2>
+      <p>Key registration and meal information for ISDO'27.</p>
+    </div>
+
+    <div class="stats">
+      <article class="stat-card stat-player"><span>Players</span><strong id="statPlayers">0</strong><small>Registered players</small></article>
+      <article class="stat-card stat-complete"><span>Complete</span><strong id="statComplete">0</strong><small>Completed registrations</small></article>
+      <article class="stat-card stat-incomplete"><span>Incomplete</span><strong id="statIncomplete">0</strong><small>Require attention</small></article>
+      <article class="stat-card stat-teams"><span>Teams</span><strong id="statTeams">0</strong><small>Registered teams</small></article>
+    </div>
+
+    <div class="stats">
+      <article class="stat-card stat-friday"><span>Friday meals</span><strong id="statFriday">0</strong><small>Lunch orders</small></article>
+      <article class="stat-card stat-saturday"><span>Saturday meals</span><strong id="statSaturday">0</strong><small>Lunch orders</small></article>
+      <article class="stat-card stat-sunday"><span>Sunday meals</span><strong id="statSunday">0</strong><small>Lunch orders</small></article>
+      <article class="stat-card stat-missing"><span>Missing meal selections</span><strong id="statMissingMeals">0</strong><small>Require attention</small></article>
+    </div>
+
+    <section class="panel attention-panel">
+      <p class="section-kicker">Check</p>
+      <h2>Attention needed</h2>
+      <div id="alerts"></div>
+    </section>
+  </section>
+
+  <section id="playersView" class="view hidden">
+    <div class="section-head admin-section-head">
+      <div><p class="section-kicker">Registrations</p><h2>Players</h2><p class="muted">Filter and export the registration database.</p></div>
+      <button id="exportPlayers">Export filtered CSV</button>
+    </div>
+
+    <div class="filters">
+      <input id="playerSearch" placeholder="Search player…">
+      <select id="filterOriginClub"><option value="">All origin clubs</option></select>
+      <select id="filterCategory"><option value="">All categories</option></select>
+      <select id="filterTeam"><option value="">All teams</option></select>
+      <select id="filterRegistration"><option value="">All registrations</option><option value="complete">Complete</option><option value="incomplete">Incomplete</option></select>
+      <select id="filterMeals"><option value="">All meal statuses</option><option value="complete">Meals completed</option><option value="missing">Meals missing</option></select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Player</th><th>#</th><th>Origin club</th><th>Teams</th><th>Registration</th><th>Meals</th><th></th></tr></thead>
+        <tbody id="playersBody"></tbody>
+      </table>
+    </div>
+    <p id="playersCount" class="muted count-line"></p>
+  </section>
+
+  <section id="mealsView" class="view hidden">
+    <div class="section-head admin-section-head">
+      <div><p class="section-kicker">Orders</p><h2>Meals</h2><p class="muted">Daily sandwich quantities and detailed lists.</p></div>
+      <button id="exportMeals">Export meals CSV</button>
+    </div>
+
+    <div class="filters meal-filters">
+      <select id="mealDayFilter"></select>
+      <select id="mealClubFilter"><option value="">All origin clubs</option></select>
+    </div>
+
+    <div id="mealSummary" class="meal-summary"></div>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Player</th><th>Origin club</th><th>Day</th><th>Choice</th><th>Price</th></tr></thead>
+        <tbody id="mealsBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="teamsView" class="view hidden">
+    <div class="section-head admin-section-head">
+      <div>
+        <p class="section-kicker">Rosters</p>
+        <h2>Teams & clubs</h2>
+        <p class="muted">Click a team to display its full roster.</p>
+      </div>
+
+      <a
+        href="/live-match.html"
+        target="_blank"
+        rel="noopener"
+        class="admin-match-overlay-button"
+      >
+        Match roster overlay
+      </a>
+    </div>
+    <div id="teamsGrid" class="teams-grid"></div>
+  </section>
+
+  <p id="appMessage" class="message hidden"></p>
+
+  <footer class="site-footer">
+    <span>ISDO'27</span>
+    <span>International Sharks Dodgeball Open</span>
+    <span>Morges · Switzerland</span>
+  </footer>
+</section>
+
+<dialog id="playerDialog" class="admin-dialog-shell">
+  <form class="dialog-card" id="playerEditForm">
+    <button class="dialog-close" type="button" id="closePlayerDialog" aria-label="Close">×</button>
+    <p class="eyebrow">Edit player</p>
+    <h2 id="editPlayerTitle"></h2>
+
+    <div class="grid two">
+      <label><span>First name</span><input id="editFirstName" required></label>
+      <label><span>Last name</span><input id="editLastName" required></label>
+      <label><span>Jersey number</span><input id="editJersey"></label>
+      <label><span>Origin club</span><select id="editOriginClub"></select></label>
+    </div>
+
+    <section class="player-teams-editor">
+      <div class="team-editor-title">
+        <p class="section-kicker">Rosters</p>
+        <h3>Teams</h3>
+        <p class="muted">Add or restore a team membership for this player.</p>
+      </div>
+
+      <div id="currentPlayerTeams" class="current-player-teams"></div>
+
+      <div class="add-team-panel">
+        <div class="grid two">
+          <label><span>Category</span><select id="addTeamCategory"><option value="">Select category</option></select></label>
+          <label><span>Team</span><select id="addTeamSelect" disabled><option value="">Select team</option></select></label>
+        </div>
+
+        <button type="button" id="addTeamButton" class="secondary">+ Add team</button>
+        <p id="teamEditMessage" class="team-edit-message muted"></p>
+      </div>
+    </section>
+
+    <div class="dialog-actions">
+      <button type="submit">Save changes</button>
+      <button type="button" id="deletePlayerButton" class="danger">Delete player</button>
+    </div>
+  </form>
+</dialog>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase.js"></script>
+<script src="/js/admin.js"></script>
+</body>
+</html>
