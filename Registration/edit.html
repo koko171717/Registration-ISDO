@@ -31,6 +31,7 @@
           <option value="player">Player</option>
           <option value="coach">Coach</option>
           <option value="other">Accompanying / Other</option>
+          <option value="referee">Referee</option>
         </select>
       </label>
 
@@ -48,7 +49,7 @@
       <h2 id="clubTeamsTitle">2. Club & teams</h2>
       <p id="clubTeamsDescription" class="muted">Select your club of origin and the category or categories in which you will play.</p>
 
-      <label><span id="originClubLabel">Club of origin *</span>
+      <label id="originClubField"><span id="originClubLabel">Club of origin *</span>
         <select id="originClub" required>
           <option value="">Select your club</option>
         </select>
@@ -97,6 +98,11 @@
           </label>
         </div>
       </div>
+      </div>
+
+      <div id="refereeTeamBlock" class="team-box hidden">
+        <h3>REFEREE</h3>
+        <p class="muted">ISDO'27 referee team · Present for all three competition days.</p>
       </div>
     </section>
 

@@ -70,6 +70,7 @@
   <nav class="tabs admin-tabs">
     <button class="tab active" data-view="overview">Overview</button>
     <button class="tab" data-view="players">Players</button>
+    <button class="tab" data-view="referees">Referees</button>
     <button class="tab" data-view="meals">Meals</button>
     <button class="tab" data-view="teams">Teams</button>
     <button class="tab" data-view="broadcast">Broadcast</button>
@@ -125,6 +126,15 @@
       </table>
     </div>
     <p id="playersCount" class="muted count-line"></p>
+  </section>
+
+  <section id="refereesView" class="view hidden">
+    <div class="section-head admin-section-head">
+      <div><p class="section-kicker">Officials</p><h2>Referees</h2><p class="muted">All registered referees are assigned to the REFEREE team and are present for all three competition days.</p></div>
+      <button id="exportReferees">Export referees CSV</button>
+    </div>
+    <div class="table-wrap"><table><thead><tr><th>Referee</th><th>Email</th><th>Team</th><th>Presence</th><th>Registration</th><th>Meals</th><th></th></tr></thead><tbody id="refereesBody"></tbody></table></div>
+    <p id="refereesCount" class="muted count-line"></p>
   </section>
 
   <section id="mealsView" class="view hidden">
@@ -213,9 +223,9 @@
     <div class="grid two">
       <label><span>First name</span><input id="editFirstName" required></label>
       <label><span>Last name</span><input id="editLastName" required></label>
-      <label><span>Registration type</span><select id="editParticipantType"><option value="player">Player</option><option value="coach">Coach</option><option value="other">Accompanying / Other</option></select></label>
+      <label><span>Registration type</span><select id="editParticipantType"><option value="player">Player</option><option value="coach">Coach</option><option value="other">Accompanying / Other</option><option value="referee">Referee</option></select></label>
       <label id="editJerseyField"><span>Jersey number</span><input id="editJersey"></label>
-      <label><span>Origin club</span><select id="editOriginClub"></select></label>
+      <label id="editOriginClubField"><span>Origin club</span><select id="editOriginClub"></select></label>
     </div>
 
     <section class="player-teams-editor">
