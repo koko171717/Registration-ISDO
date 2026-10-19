@@ -41,6 +41,7 @@ function bindEvents() {
   $("mealClubFilter").onchange = renderMeals;
 
   $("exportPlayers").onclick = exportPlayers;
+  $("exportReferees").onclick = exportReferees;
   $("exportMeals").onclick = exportMeals;
 
   $("closePlayerDialog").onclick = () => $("playerDialog").close();
@@ -119,6 +120,7 @@ async function load() {
     populateFilters();
     renderOverview();
     renderPlayers();
+    renderReferees();
     renderMeals();
     renderTeams();
     loadBroadcast();
@@ -164,6 +166,7 @@ function populateFilters() {
     $("mealClubFilter").add(new Option(club.name, club.id));
     $("editOriginClub").add(new Option(club.name, club.id));
   });
+  $("mealClubFilter").add(new Option("REFEREE", "__referee__"));
 
   resetSelectExceptFirst($("filterCategory"));
   data.categories.forEach(category => {
@@ -269,6 +272,7 @@ function filteredPlayers() {
 
   return data.players
     .filter(player => {
+      if (player.participant_type === "referee") return false;
       if (
         search &&
         !`${player.first_name} ${player.last_name}`
@@ -385,7 +389,7 @@ window.openPlayer = function openPlayer(id) {
   $("editLastName").value = selectedPlayer.last_name;
   $("editParticipantType").value = selectedPlayer.participant_type || "player";
   $("editJersey").value = selectedPlayer.jersey_number || "";
-  $("editOriginClub").value = selectedPlayer.origin_club_id;
+  $("editOriginClub").value = selectedPlayer.origin_club_id || "";
 
   updateParticipantTypeUI();
   renderPlayerTeamsEditor();
@@ -699,8 +703,8 @@ async function deletePlayer() {
   await load();
 }
 
-function participantTypeLabel(type){return type==='coach'?'Coach':type==='other'?'Accompanying / Other':'Player';}
-function updateParticipantTypeUI(){const type=$("editParticipantType").value;$("editJerseyField").classList.toggle("hidden",type!=="player");if(type!=="player")$("editJersey").value="";const teamEditor=document.querySelector(".player-teams-editor:not(#coachAssignmentsEditor)");if(teamEditor)teamEditor.classList.toggle("hidden",type!=="player");}
+function participantTypeLabel(type){return type==='coach'?'Coach':type==='other'?'Accompanying / Other':type==='referee'?'Referee':'Player';}
+function updateParticipantTypeUI(){const type=$("editParticipantType").value;const referee=type==="referee";$("editJerseyField").classList.toggle("hidden",type!=="player");$("editOriginClubField").classList.toggle("hidden",referee);$("editOriginClub").required=!referee;if(type!=="player")$("editJersey").value="";if(referee)$("editOriginClub").value="";const teamEditor=document.querySelector(".player-teams-editor:not(#coachAssignmentsEditor)");if(teamEditor)teamEditor.classList.toggle("hidden",type!=="player");const coachEditor=$("coachAssignmentsEditor");if(coachEditor)coachEditor.classList.toggle("hidden",referee);}
 function renderCoachAssignmentsEditor(){if(!selectedPlayer)return;const box=$("currentCoachAssignments");const assignments=selectedPlayer.coach_teams||[];box.innerHTML="";if(!assignments.length){box.innerHTML=`<p class="muted">${selectedPlayer.participant_type==='coach'?'Club coach by default — currently shown for all teams of this club.':'No team coaching assignment.'}</p>`;}else{assignments.forEach(a=>{const row=document.createElement("div");row.className="current-team-row";row.innerHTML=`<div class="current-team-info"><span class="badge role">${escapeHtml(a.category)}</span><strong>${escapeHtml(a.team_name)}</strong></div><button type="button" class="mini-danger">Remove</button>`;row.querySelector("button").onclick=()=>removeCoachAssignment(a.assignment_id);box.appendChild(row)})}const select=$("addCoachTeam");select.innerHTML='<option value="">Select team</option>';const used=new Set(assignments.map(a=>a.team_id));data.teams
   .slice()
   .filter(t=>t.managing_club_id===selectedPlayer.origin_club_id)
@@ -709,6 +713,10 @@ function renderCoachAssignmentsEditor(){if(!selectedPlayer)return;const box=$("c
   .forEach(t=>select.add(new Option(`${t.category} — ${t.team_name}`,t.id)));$("coachAssignmentHelp").textContent=selectedPlayer.participant_type==='coach'?(assignments.length?'This club coach is now team-specific and will appear only on assigned teams.':'Club coach by default: appears on all teams of the club until a specific team assignment is added.'):'Players and other registrations appear as coaches only on teams assigned here.';}
 async function addCoachAssignment(){const teamId=$("addCoachTeam").value;if(!teamId){$("coachEditMessage").textContent="Select a team first.";return}try{$("coachEditMessage").textContent="Adding coach…";await api("/api/admin-player",{method:"POST",body:JSON.stringify({action:"add_coach_assignment",participant_id:selectedPlayer.id,team_id:teamId})});await refreshSelectedPlayer();$("coachEditMessage").textContent="Coach assignment added."}catch(e){$("coachEditMessage").textContent=e.message}}
 async function removeCoachAssignment(assignmentId){try{await api("/api/admin-player",{method:"POST",body:JSON.stringify({action:"remove_coach_assignment",assignment_id:assignmentId})});await refreshSelectedPlayer();$("coachEditMessage").textContent="Coach assignment removed."}catch(e){$("coachEditMessage").textContent=e.message}}
+
+function getReferees(){return data.players.filter(player=>player.participant_type==="referee").slice().sort((a,b)=>`${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`))}
+function renderReferees(){const referees=getReferees();$("refereesCount").textContent=`${referees.length} ${referees.length===1?"referee":"referees"}`;$("refereesBody").innerHTML=referees.map(referee=>`<tr><td><b>${escapeHtml(referee.first_name)} ${escapeHtml(referee.last_name)}</b></td><td>${escapeHtml(referee.email||"—")}</td><td><span class="badge role">REFEREE</span></td><td><span class="badge ok">Friday · Saturday · Sunday</span></td><td><span class="badge ${referee.registration_complete?"ok":"warn"}">${referee.registration_complete?"Complete":"Incomplete"}</span></td><td><span class="badge ${referee.meals_complete?"ok":"warn"}">${referee.meals_complete?"Meals ✓":"Meals missing"}</span></td><td><button class="secondary" onclick="openPlayer('${referee.id}')">Edit</button></td></tr>`).join("")}
+function exportReferees(){const rows=[["First name","Last name","Email","Team","Presence","Registration","Meals"]];getReferees().forEach(referee=>rows.push([referee.first_name,referee.last_name,referee.email||"","REFEREE","Friday | Saturday | Sunday",referee.registration_complete?"Complete":"Incomplete",referee.meals_complete?"Complete":"Missing"]));downloadCsv("isdo-referees.csv",rows)}
 
 function renderMeals() {
   if (!data) {
@@ -770,7 +778,7 @@ function renderMeals() {
       meal => `
         <tr>
           <td>${escapeHtml(meal.first_name)} ${escapeHtml(meal.last_name)}</td>
-          <td>${escapeHtml(meal.origin_club_name)}</td>
+          <td>${escapeHtml(meal.participant_type === "referee" ? "REFEREE" : meal.origin_club_name)}</td>
           <td>${escapeHtml(meal.day_name)}</td>
           <td>${escapeHtml(meal.ordered ? meal.sandwich_name : "No meal")}</td>
           <td>${meal.ordered ? `CHF ${Number(meal.price_chf).toFixed(2)}` : "—"}</td>
@@ -1121,12 +1129,8 @@ function exportMeals() {
         return false;
       }
 
-      if (
-        clubId &&
-        meal.origin_club_id !== clubId
-      ) {
-        return false;
-      }
+      if (clubId === "__referee__" && meal.participant_type !== "referee") return false;
+      if (clubId && clubId !== "__referee__" && meal.origin_club_id !== clubId) return false;
 
       return true;
     })
