@@ -719,73 +719,26 @@ function renderReferees(){const referees=getReferees();$("refereesCount").textCo
 function exportReferees(){const rows=[["First name","Last name","Email","Team","Presence","Registration","Meals"]];getReferees().forEach(referee=>rows.push([referee.first_name,referee.last_name,referee.email||"","REFEREE","Friday | Saturday | Sunday",referee.registration_complete?"Complete":"Incomplete",referee.meals_complete?"Complete":"Missing"]));downloadCsv("isdo-referees.csv",rows)}
 
 function renderMeals() {
-  if (!data) {
-    return;
-  }
-
+  if (!data) return;
   const dayId = $("mealDayFilter").value;
   const clubId = $("mealClubFilter").value;
-
   const rows = data.meals.filter(meal => {
-    if (dayId && meal.meal_day_id !== dayId) {
-      return false;
-    }
-
-    if (clubId && meal.origin_club_id !== clubId) {
-      return false;
-    }
-
+    if (dayId && meal.meal_day_id !== dayId) return false;
+    if (clubId === "__referee__" && meal.participant_type !== "referee") return false;
+    if (clubId && clubId !== "__referee__" && meal.origin_club_id !== clubId) return false;
     return true;
   });
-
-  const orderedMeals = rows.filter(meal => meal.ordered);
-  const counts = {};
-
-  data.sandwich_options.forEach(option => {
-    counts[option.name] = 0;
-  });
-
-  orderedMeals.forEach(meal => {
-    counts[meal.sandwich_name] =
-      (counts[meal.sandwich_name] || 0) + 1;
-  });
-
-  $("mealSummary").innerHTML =
-    Object.entries(counts)
-      .map(
-        ([name, count]) => `
-          <div class="meal-card">
-            <span>${escapeHtml(name)}</span>
-            <strong>${count}</strong>
-          </div>
-        `
-      )
-      .join("") +
-    `
-      <div class="meal-card">
-        <span>Total meals</span>
-        <strong>${orderedMeals.length}</strong>
-      </div>
-    `;
-
-  $("mealsBody").innerHTML = rows
-    .sort((a, b) =>
-      `${a.last_name} ${a.first_name}`.localeCompare(
-        `${b.last_name} ${b.first_name}`
-      )
-    )
-    .map(
-      meal => `
-        <tr>
-          <td>${escapeHtml(meal.first_name)} ${escapeHtml(meal.last_name)}</td>
-          <td>${escapeHtml(meal.participant_type === "referee" ? "REFEREE" : meal.origin_club_name)}</td>
-          <td>${escapeHtml(meal.day_name)}</td>
-          <td>${escapeHtml(meal.ordered ? meal.sandwich_name : "No meal")}</td>
-          <td>${meal.ordered ? `CHF ${Number(meal.price_chf).toFixed(2)}` : "—"}</td>
-        </tr>
-      `
-    )
-    .join("");
+  const orderedMeals=rows.filter(m=>m.ordered),sandwichMeals=orderedMeals.filter(m=>m.meal_type==="sandwich"),hotMeals=orderedMeals.filter(m=>m.meal_type==="hot");
+  const sandwichCounts={};data.sandwich_options.forEach(o=>sandwichCounts[o.name]=0);sandwichMeals.forEach(m=>sandwichCounts[m.choice_name]=(sandwichCounts[m.choice_name]||0)+1);
+  const hotCounts={};(data.hot_meal_options||[]).filter(o=>!dayId||o.meal_day_id===dayId).forEach(o=>hotCounts[o.name]=0);hotMeals.forEach(m=>hotCounts[m.choice_name]=(hotCounts[m.choice_name]||0)+1);
+  $("mealSummary").innerHTML=[
+    `<div class="meal-card"><span>Sandwich menus</span><strong>${sandwichMeals.length}</strong></div>`,
+    ...Object.entries(sandwichCounts).map(([name,count])=>`<div class="meal-card"><span>Sandwich · ${escapeHtml(name)}</span><strong>${count}</strong></div>`),
+    `<div class="meal-card"><span>Hot meals</span><strong>${hotMeals.length}</strong></div>`,
+    ...Object.entries(hotCounts).map(([name,count])=>`<div class="meal-card"><span>Hot · ${escapeHtml(name)}</span><strong>${count}</strong></div>`),
+    `<div class="meal-card"><span>Total meals</span><strong>${orderedMeals.length}</strong></div>`
+  ].join("");
+  $("mealsBody").innerHTML=rows.sort((a,b)=>`${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`)).map(meal=>{const clubLabel=meal.participant_type==="referee"?"REFEREE":meal.origin_club_name;const choice=meal.meal_type==="sandwich"?`Sandwich — ${meal.choice_name}`:meal.meal_type==="hot"?`Hot meal — ${meal.choice_name}`:"No meal";return `<tr><td>${escapeHtml(meal.first_name)} ${escapeHtml(meal.last_name)}</td><td>${escapeHtml(clubLabel)}</td><td>${escapeHtml(meal.day_name)}</td><td>${escapeHtml(choice)}</td><td>${meal.ordered?`CHF ${Number(meal.price_chf).toFixed(2)}`:"—"}</td></tr>`}).join("");
 }
 
 function renderTeams() {
@@ -1109,86 +1062,10 @@ function exportPlayers() {
 }
 
 function exportMeals() {
-  const dayId = $("mealDayFilter").value;
-  const clubId = $("mealClubFilter").value;
-
-  const rows = [
-    [
-      "First name",
-      "Last name",
-      "Origin club",
-      "Day",
-      "Meal",
-      "Price CHF"
-    ]
-  ];
-
-  data.meals
-    .filter(meal => {
-      if (dayId && meal.meal_day_id !== dayId) {
-        return false;
-      }
-
-      if (clubId === "__referee__" && meal.participant_type !== "referee") return false;
-      if (clubId && clubId !== "__referee__" && meal.origin_club_id !== clubId) return false;
-
-      return true;
-    })
-    .forEach(meal => {
-      rows.push([
-        meal.first_name,
-        meal.last_name,
-        meal.origin_club_name,
-        meal.day_name,
-        meal.ordered
-          ? meal.sandwich_name
-          : "No meal",
-        meal.ordered ? meal.price_chf : ""
-      ]);
-    });
-
-  downloadCsv("isdo-meals.csv", rows);
-}
-
-
-function downloadTeamRoster(team, players) {
-  const clubName = team.managing_club_name || "Club";
-  const teamName = team.team_name || "Team";
-  const category = team.category || "";
-
-  const rows = [
-    ["Club", clubName],
-    ["Team", teamName],
-    ["Category", category],
-    [],
-    ["Number", "Last name", "First name", "Role"]
-  ];
-
-  players.forEach(player => {
-    const membership = player.teams.find(
-      playerTeam => playerTeam.id === team.id
-    );
-
-    const role = membership?.captain
-      ? "C"
-      : membership?.vice_captain
-        ? "VC"
-        : "";
-
-    rows.push([
-      player.jersey_number || "",
-      player.last_name || "",
-      player.first_name || "",
-      role
-    ]);
-  });
-
-  const safeName = `${clubName}-${teamName}-${category}`
-    .replace(/[^a-z0-9]+/gi, "-")
-    .replace(/^-+|-+$/g, "")
-    .toLowerCase();
-
-  downloadCsv(`isdo27-roster-${safeName || "team"}.csv`, rows);
+  const dayId=$("mealDayFilter").value,clubId=$("mealClubFilter").value;
+  const rows=[["First name","Last name","Origin / group","Day","Menu type","Choice","Price CHF"]];
+  data.meals.filter(meal=>{if(dayId&&meal.meal_day_id!==dayId)return false;if(clubId==="__referee__"&&meal.participant_type!=="referee")return false;if(clubId&&clubId!=="__referee__"&&meal.origin_club_id!==clubId)return false;return true}).forEach(meal=>rows.push([meal.first_name,meal.last_name,meal.participant_type==="referee"?"REFEREE":meal.origin_club_name,meal.day_name,meal.menu_name,meal.choice_name||"",meal.ordered?meal.price_chf:""]));
+  downloadCsv("isdo-meals.csv",rows);
 }
 
 function downloadCsv(name, rows) {
