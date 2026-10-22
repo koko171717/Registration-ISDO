@@ -33,9 +33,42 @@ export default async function handler(req,res){
    if(b.action==="update_participant"){
     const p=(await q("players",`select=id,origin_club_id,participant_type&id=eq.${b.participant_id}`))[0];if(!p||(!scope.admin&&!scope.ids.includes(p.origin_club_id)))throw E(403,"Participant not allowed.");
     const days=await q("meal_days","select=id&active=eq.true"),sands=await q("sandwich_options","select=id&active=eq.true"),meals=validateMeals(b.meals||[],days,sands);
-    await patch("players",`id=eq.${p.id}`,{first_name:String(b.first_name||"").trim(),last_name:String(b.last_name||"").trim(),email:String(b.email||"").trim().toLowerCase(),jersey_number:p.participant_type==="player"?(b.jersey_number||null):null});
-    await del("player_meals",`player_id=eq.${p.id}`);
-    await post("player_meals",meals.map(m=>({...m,player_id:p.id})));
+
+    // Safe meal save:
+    // - never delete all current meals first
+    // - update existing rows day-by-day
+    // - insert only missing days
+    // - remove obsolete rows only after all requested days were saved successfully
+    const existing=await q("player_meals",`select=id,meal_day_id&player_id=eq.${p.id}`);
+    const byDay=new Map(existing.map(row=>[row.meal_day_id,row]));
+    const requestedDayIds=new Set(meals.map(m=>m.meal_day_id));
+
+    for(const meal of meals){
+     const payload={...meal,player_id:p.id};
+     const current=byDay.get(meal.meal_day_id);
+     if(current){
+      const {player_id,...changes}=payload;
+      await patch("player_meals",`id=eq.${current.id}`,changes);
+     }else{
+      await post("player_meals",payload);
+     }
+    }
+
+    // Only after every new/updated row succeeded do we remove obsolete meal-day rows.
+    for(const row of existing){
+     if(!requestedDayIds.has(row.meal_day_id)){
+      await del("player_meals",`id=eq.${row.id}`);
+     }
+    }
+
+    // Update personal data after meals have saved successfully.
+    await patch("players",`id=eq.${p.id}`,{
+     first_name:String(b.first_name||"").trim(),
+     last_name:String(b.last_name||"").trim(),
+     email:String(b.email||"").trim().toLowerCase(),
+     jersey_number:p.participant_type==="player"?(b.jersey_number||null):null
+    });
+
     return res.json({ok:true});
    }
    throw E(400,"Unknown action.");

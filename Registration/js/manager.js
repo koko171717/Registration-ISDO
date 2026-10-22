@@ -61,13 +61,208 @@ function prefOptions(selected,allowBlank=false){const vals=["chicken","beef_pork
 function renderParticipantMeals(p){$("participantMeals").innerHTML=currentData.meal_days.map(day=>{const m=(p.meals||[]).find(x=>x.meal_day_id===day.id)||{meal_type:"none"};return `<div class="meal-edit-card" data-day="${day.id}"><h4>${esc(day.name)}</h4><div class="meal-grid"><select class="meal-type"><option value="none" ${m.meal_type==="none"?"selected":""}>${esc(t("noMeal"))}</option><option value="sandwich" ${m.meal_type==="sandwich"?"selected":""}>${esc(t("sandwich"))}</option><option value="hot" ${m.meal_type==="hot"?"selected":""}>${esc(t("hotMeal"))}</option></select><select class="sandwich-choice">${currentData.sandwich_options.map(o=>`<option value="${o.id}" ${o.id===m.sandwich_option_id?"selected":""}>${esc(o.name)}</option>`).join("")}</select><div class="hot-prefs"><select class="hot-p1">${prefOptions(m.hot_preference_1||"chicken")}</select><select class="hot-p2">${prefOptions(m.hot_preference_2||"",true)}</select></div></div></div>`}).join("");document.querySelectorAll(".meal-edit-card").forEach(card=>{const type=card.querySelector(".meal-type"),sand=card.querySelector(".sandwich-choice"),hot=card.querySelector(".hot-prefs");const sync=()=>{sand.style.display=type.value==="sandwich"?"block":"none";hot.style.display=type.value==="hot"?"grid":"none"};type.onchange=sync;sync()})}
 async function saveParticipant(ev){ev.preventDefault();if(!editingParticipant)return;const meals=[...document.querySelectorAll(".meal-edit-card")].map(card=>{const type=card.querySelector(".meal-type").value;return{meal_day_id:card.dataset.day,meal_type:type,sandwich_option_id:type==="sandwich"?card.querySelector(".sandwich-choice").value:null,hot_preference_1:type==="hot"?card.querySelector(".hot-p1").value:null,hot_preference_2:type==="hot"?card.querySelector(".hot-p2").value:null}});$("participantEditMessage").textContent=t("saving");try{await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:"update_participant",participant_id:editingParticipant.id,first_name:$("peFirst").value.trim(),last_name:$("peLast").value.trim(),email:$("peEmail").value.trim(),jersey_number:editingParticipant.participant_type==="player"?($("peJersey").value.trim()||null):null,meals})});$("participantEditMessage").textContent=t("saved");await load();editingParticipant=currentData.participants.find(x=>x.id===editingParticipant.id);renderParticipants();setTimeout(()=>{$("participantEditDialog").close()},350)}catch(e){$("participantEditMessage").textContent=e.message}}
 async function imgData(url){try{const r=await fetch(url);if(!r.ok)throw 0;const b=await r.blob();return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(b)})}catch{return null}}
-async function exportPdf(){if(!currentTeam)return;try{const {jsPDF}=window.jspdf;const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});const W=210,M=12;doc.setFillColor(17,22,31);doc.rect(0,0,W,42,"F");const [eventLogo,teamLogo]=await Promise.all([imgData("/assets/isdo27-logo.png"),imgData(currentTeam.logo_url||currentTeam.club_logo_url||"/assets/isdo27-logo.png")]);if(eventLogo)doc.addImage(eventLogo,"PNG",M,6,26,26);if(teamLogo)doc.addImage(teamLogo,"PNG",171,6,26,26);doc.setTextColor(239,49,84);doc.setFontSize(8);doc.setFont("helvetica","bold");doc.text("INTERNATIONAL SHARKS DODGEBALL OPEN",43,11);doc.setTextColor(255,255,255);doc.setFontSize(18);doc.text("ISDO 2027",43,19);doc.setFontSize(9);doc.setFont("helvetica","normal");doc.text("26–28 March 2027 · Morges, Switzerland",43,25);doc.setFontSize(13);doc.setFont("helvetica","bold");doc.text(currentTeam.team_name,160,36,{align:"right"});doc.setFontSize(8);doc.text(catLabel(currentTeam.category),160,31,{align:"right"});
- let y=49;doc.setTextColor(17,24,39);doc.setFillColor(242,244,255);doc.roundedRect(M,y,W-2*M,18,3,3,"F");doc.setFontSize(8);doc.setTextColor(64,86,180);doc.setFont("helvetica","bold");doc.text(t("coaches").toUpperCase(),M+5,y+6);doc.setTextColor(17,24,39);doc.setFontSize(10);doc.text((currentTeam.coaches||[]).map(c=>`${c.first_name} ${c.last_name}`).join(" · ")||"—",M+5,y+13);y+=23;
- const ps=sortedPlayers(currentTeam.players),cap=ps.find(p=>p.captain),vc=ps.find(p=>p.vice_captain);doc.setDrawColor(226,231,239);doc.roundedRect(M,y,90,18,3,3);doc.roundedRect(108,y,90,18,3,3);doc.setFontSize(7);doc.setTextColor(102,112,133);doc.text(t("captain").toUpperCase(),M+4,y+5);doc.text(t("viceCaptain").toUpperCase(),112,y+5);doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(17,24,39);doc.text(cap?`#${cap.jersey_number||"—"}  ${cap.first_name} ${cap.last_name}`:"—",M+4,y+12);doc.text(vc?`#${vc.jersey_number||"—"}  ${vc.first_name} ${vc.last_name}`:"—",112,y+12);y+=24;
- doc.setFontSize(12);doc.text(t("fullRoster"),M,y);y+=3;
- const body=ps.map(p=>[p.jersey_number||"—",`${p.first_name} ${p.last_name}`,[p.captain?"C":"",p.vice_captain?"VC":"",p.is_team_coach?t("coach"):""].filter(Boolean).join(" · ")||"—"]);
- const fontSize=body.length>16?7.5:body.length>12?8.5:9.2;doc.autoTable({startY:y,head:[["#",t("player"),t("role")]],body,margin:{left:M,right:M},theme:"grid",styles:{fontSize,cellPadding:2.4,textColor:[17,24,39],lineColor:[226,231,239],lineWidth:.25},headStyles:{fillColor:[17,22,31],textColor:[255,255,255],fontStyle:"bold"},columnStyles:{0:{cellWidth:18},2:{cellWidth:38}}});
- const end=doc.lastAutoTable.finalY;doc.setDrawColor(220,224,232);doc.line(M,287,W-M,287);doc.setFontSize(7);doc.setTextColor(102,112,133);doc.text("ISDO 2027 · Official roster sheet",M,291);doc.text(`${ps.length} ${t("players")}`,W-M,291,{align:"right"});
- doc.save(`ISDO2027_${currentTeam.category}_${currentTeam.team_name}`.replace(/[^a-z0-9_-]+/gi,"_")+".pdf");
- }catch(e){console.error(e);alert(t("pdfError"))}}
+async function exportPdf(){
+ if(!currentTeam)return;
+ try{
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
+  const W=210,H=297,M=12,CONTENT=W-2*M;
+  const ps=sortedPlayers(currentTeam.players||[]);
+  const cap=ps.find(p=>p.captain);
+  const vc=ps.find(p=>p.vice_captain);
+  const coaches=(currentTeam.coaches||[]).map(c=>`${c.first_name} ${c.last_name}`);
+  const [eventLogo,teamLogo]=await Promise.all([
+   imgData("/assets/isdo27-logo.png"),
+   imgData(currentTeam.logo_url||currentTeam.club_logo_url||"/assets/isdo27-logo.png")
+  ]);
+
+  // ===== TOP EVENT HEADER =====
+  doc.setFillColor(15,20,29);
+  doc.rect(0,0,W,48,"F");
+  doc.setFillColor(239,49,84);
+  doc.rect(0,45,W,3,"F");
+
+  if(eventLogo){
+   doc.setFillColor(255,255,255);
+   doc.roundedRect(M,7,29,29,3,3,"F");
+   doc.addImage(eventLogo,"PNG",M+2,9,25,25);
+  }
+
+  doc.setFont("helvetica","bold");
+  doc.setTextColor(239,49,84);
+  doc.setFontSize(7.5);
+  doc.text("INTERNATIONAL SHARKS DODGEBALL OPEN",46,11);
+
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(20);
+  doc.text("ISDO 2027",46,20);
+
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(199,207,221);
+  doc.text("26–28 March 2027  ·  Beausobre, Morges  ·  Switzerland",46,27);
+
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(8);
+  doc.setTextColor(255,255,255);
+  doc.text("OFFICIAL TEAM ROSTER",46,35);
+
+  // ===== TEAM IDENTITY CARD =====
+  let y=55;
+  doc.setFillColor(248,249,252);
+  doc.setDrawColor(226,231,239);
+  doc.roundedRect(M,y,CONTENT,31,4,4,"FD");
+
+  if(teamLogo){
+   doc.setFillColor(255,255,255);
+   doc.roundedRect(M+4,y+4,23,23,3,3,"F");
+   doc.addImage(teamLogo,"PNG",M+6,y+6,19,19);
+  }
+
+  const teamTextX=M+32;
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(8);
+  doc.setTextColor(64,86,180);
+  doc.text(catLabel(currentTeam.category).toUpperCase(),teamTextX,y+8);
+
+  doc.setFontSize(17);
+  doc.setTextColor(17,24,39);
+  const teamNameLines=doc.splitTextToSize(currentTeam.team_name,100);
+  doc.text(teamNameLines,teamTextX,y+17);
+
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(8.5);
+  doc.setTextColor(102,112,133);
+  if(currentTeam.managing_club_name){
+   doc.text(currentTeam.managing_club_name,teamTextX,y+25);
+  }
+
+  // player count chip
+  doc.setFillColor(238,242,255);
+  doc.roundedRect(164,y+7,29,17,3,3,"F");
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(15);
+  doc.setTextColor(64,86,180);
+  doc.text(String(ps.length),178.5,y+15,{align:"center"});
+  doc.setFontSize(6.5);
+  doc.setTextColor(102,112,133);
+  doc.text(t("players").toUpperCase(),178.5,y+20,{align:"center"});
+
+  y+=37;
+
+  // ===== COACHES BAND =====
+  doc.setFillColor(243,245,255);
+  doc.setDrawColor(226,231,239);
+  doc.roundedRect(M,y,CONTENT,16,3,3,"FD");
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(7);
+  doc.setTextColor(64,86,180);
+  doc.text(t("coaches").toUpperCase(),M+4,y+5.5);
+
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(9.5);
+  doc.setTextColor(17,24,39);
+  const coachText=coaches.length?coaches.join("  ·  "):"—";
+  const coachLines=doc.splitTextToSize(coachText,CONTENT-8);
+  doc.text(coachLines.slice(0,2),M+4,y+11.5);
+  y+=21;
+
+  // ===== CAPTAIN / VICE-CAPTAIN =====
+  const boxGap=4,boxW=(CONTENT-boxGap)/2,boxH=19;
+  const drawLeader=(x,label,p,accent)=>{
+   doc.setDrawColor(226,231,239);
+   doc.setFillColor(255,255,255);
+   doc.roundedRect(x,y,boxW,boxH,3,3,"FD");
+   doc.setFillColor(...accent);
+   doc.roundedRect(x,y,2.3,boxH,1,1,"F");
+   doc.setFont("helvetica","bold");
+   doc.setFontSize(6.8);
+   doc.setTextColor(102,112,133);
+   doc.text(label.toUpperCase(),x+6,y+5.5);
+   doc.setFontSize(10.5);
+   doc.setTextColor(17,24,39);
+   const who=p?`#${p.jersey_number||"—"}  ${p.first_name} ${p.last_name}`:"—";
+   doc.text(doc.splitTextToSize(who,boxW-12)[0],x+6,y+13);
+  };
+  drawLeader(M,t("captain"),cap,[112,87,216]);
+  drawLeader(M+boxW+boxGap,t("viceCaptain"),vc,[64,86,180]);
+  y+=25;
+
+  // ===== ROSTER TITLE =====
+  doc.setFont("helvetica","bold");
+  doc.setFontSize(12);
+  doc.setTextColor(17,24,39);
+  doc.text(t("fullRoster"),M,y);
+
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(102,112,133);
+  doc.text(`${ps.length} ${t("players")}`,W-M,y,{align:"right"});
+  y+=4;
+
+  // ===== TABLE =====
+  const body=ps.map(p=>[
+   p.jersey_number||"—",
+   `${p.first_name} ${p.last_name}`,
+   [
+    p.captain?"C":"",
+    p.vice_captain?"VC":"",
+    p.is_team_coach?t("coach"):""
+   ].filter(Boolean).join("  ·  ")||"—"
+  ]);
+
+  const rowCount=body.length;
+  const fontSize=rowCount>20?7.0:rowCount>17?7.6:rowCount>14?8.2:8.8;
+  const pad=rowCount>20?1.55:rowCount>17?1.8:2.15;
+
+  doc.autoTable({
+   startY:y,
+   head:[["#",t("player"),t("role")]],
+   body,
+   margin:{left:M,right:M,bottom:16},
+   theme:"plain",
+   styles:{
+    font:"helvetica",
+    fontSize,
+    cellPadding:pad,
+    textColor:[17,24,39],
+    lineColor:[229,233,240],
+    lineWidth:{bottom:.22},
+    valign:"middle"
+   },
+   headStyles:{
+    fillColor:[15,20,29],
+    textColor:[255,255,255],
+    fontStyle:"bold",
+    fontSize:7.5,
+    cellPadding:2.4
+   },
+   alternateRowStyles:{fillColor:[249,250,252]},
+   columnStyles:{
+    0:{cellWidth:18,fontStyle:"bold",halign:"center"},
+    1:{cellWidth:105,fontStyle:"bold"},
+    2:{cellWidth:CONTENT-18-105}
+   },
+   didDrawPage:()=>{
+    // Intentionally empty: design is forced to a single A4 page by compact row sizing.
+   }
+  });
+
+  // ===== FOOTER =====
+  doc.setDrawColor(220,224,232);
+  doc.line(M,286,W-M,286);
+  doc.setFont("helvetica","normal");
+  doc.setFontSize(6.8);
+  doc.setTextColor(112,121,139);
+  doc.text("ISDO 2027  ·  International Sharks Dodgeball Open",M,291);
+  doc.text(`${catLabel(currentTeam.category)}  ·  ${currentTeam.team_name}`,W-M,291,{align:"right"});
+
+  const filename=`ISDO2027_${currentTeam.category}_${currentTeam.team_name}`
+   .replace(/[^a-z0-9_-]+/gi,"_")+".pdf";
+  doc.save(filename);
+ }catch(e){
+  console.error(e);
+  alert(t("pdfError"));
+ }
+}
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
