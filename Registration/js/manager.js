@@ -1,236 +1,73 @@
 const db=window.isdoSupabase,$=id=>document.getElementById(id);
-let session=null,selected=null,currentData=null,currentTeam=null;
+let session=null,currentData=null,currentTeam=null,selected=null,participantFilter="all",editingParticipant=null;
 let lang=localStorage.getItem("isdo_manager_lang")||"en";
 
-const I18N={
-en:{managerPortal:"Manager Portal",language:"Language",signInHelp:"Sign in with the email assigned to your club.",email:"Email",password:"Password",signIn:"Sign in",signOut:"Sign out",clubOverview:"Club overview",summary:"Summary",summaryHelp:"People are counted once according to their club of origin.",teams:"Teams",clubPlayers:"Club players",coaches:"Coaches",accompanying:"Accompanying",competition:"Competition",yourRosters:"Your rosters",rosterHelp:"Open a team to view and print its official roster sheet.",players:"players",player:"Player",close:"Close",printRoster:"Print roster",addCoach:"Add coach",captain:"Captain",viceCaptain:"Vice-captain",fullRoster:"Full roster",number:"#",role:"Role",registration:"Registration",meals:"Meals",playerHint:"Click a player to manage captain, vice-captain or team coach roles.",jersey:"Jersey",removeFromRoster:"Remove from this roster",selectCoach:"Select a player or coach…",noCoach:"No coach assigned",notAssigned:"Not assigned",complete:"Complete",incomplete:"Incomplete",completed:"Completed",missing:"Missing",setCaptain:"Set as captain",removeCaptain:"Remove captain",setVice:"Set as vice-captain",removeVice:"Remove vice-captain",setCoach:"Set as coach",removeCoach:"Remove coach",addingCoach:"Adding coach…",team:"team",teamsLabel:"teams",rosterPlayers:"players in roster",catMen:"Men",catWomen:"Women",catMixed:"Mixed",coach:"Coach",playerType:"Player",removeConfirm:"Remove {name} from {team}?",myClubs:"My Clubs"},
-fr:{managerPortal:"Portail Manager",language:"Langue",signInHelp:"Connectez-vous avec l’adresse e-mail attribuée à votre club.",email:"E-mail",password:"Mot de passe",signIn:"Se connecter",signOut:"Se déconnecter",clubOverview:"Aperçu du club",summary:"Résumé",summaryHelp:"Chaque personne est comptée une seule fois selon son club d’origine.",teams:"Équipes",clubPlayers:"Joueurs du club",coaches:"Coachs",accompanying:"Accompagnants",competition:"Compétition",yourRosters:"Vos rosters",rosterHelp:"Ouvrez une équipe pour consulter et imprimer sa feuille de roster officielle.",players:"joueurs",player:"Joueur",close:"Fermer",printRoster:"Imprimer le roster",addCoach:"Ajouter un coach",captain:"Capitaine",viceCaptain:"Vice-capitaine",fullRoster:"Roster complet",number:"#",role:"Rôle",registration:"Inscription",meals:"Repas",playerHint:"Cliquez sur un joueur pour gérer les rôles de capitaine, vice-capitaine ou coach d’équipe.",jersey:"Maillot",removeFromRoster:"Retirer de ce roster",selectCoach:"Sélectionner un joueur ou un coach…",noCoach:"Aucun coach assigné",notAssigned:"Non assigné",complete:"Complet",incomplete:"Incomplet",completed:"Complet",missing:"Manquant",setCaptain:"Définir comme capitaine",removeCaptain:"Retirer le rôle de capitaine",setVice:"Définir comme vice-capitaine",removeVice:"Retirer le rôle de vice-capitaine",setCoach:"Définir comme coach",removeCoach:"Retirer comme coach",addingCoach:"Ajout du coach…",team:"équipe",teamsLabel:"équipes",rosterPlayers:"joueurs dans le roster",catMen:"Hommes",catWomen:"Femmes",catMixed:"Mixte",coach:"Coach",playerType:"Joueur",removeConfirm:"Retirer {name} de {team} ?",myClubs:"Mes clubs"},
-de:{managerPortal:"Manager-Portal",language:"Sprache",signInHelp:"Melde dich mit der deinem Club zugewiesenen E-Mail-Adresse an.",email:"E-Mail",password:"Passwort",signIn:"Anmelden",signOut:"Abmelden",clubOverview:"Clubübersicht",summary:"Übersicht",summaryHelp:"Jede Person wird anhand ihres Herkunftsclubs nur einmal gezählt.",teams:"Teams",clubPlayers:"Clubspieler",coaches:"Coaches",accompanying:"Begleitpersonen",competition:"Wettbewerb",yourRosters:"Deine Kader",rosterHelp:"Öffne ein Team, um den offiziellen Kader anzusehen und zu drucken.",players:"Spieler",player:"Spieler",close:"Schließen",printRoster:"Kader drucken",addCoach:"Coach hinzufügen",captain:"Kapitän",viceCaptain:"Vizekapitän",fullRoster:"Gesamter Kader",number:"#",role:"Rolle",registration:"Anmeldung",meals:"Mahlzeiten",playerHint:"Klicke auf einen Spieler, um Kapitän, Vizekapitän oder Team-Coach zu verwalten.",jersey:"Trikot",removeFromRoster:"Aus diesem Kader entfernen",selectCoach:"Spieler oder Coach auswählen…",noCoach:"Kein Coach zugewiesen",notAssigned:"Nicht zugewiesen",complete:"Vollständig",incomplete:"Unvollständig",completed:"Vollständig",missing:"Fehlt",setCaptain:"Als Kapitän festlegen",removeCaptain:"Kapitänsrolle entfernen",setVice:"Als Vizekapitän festlegen",removeVice:"Vizekapitänsrolle entfernen",setCoach:"Als Coach festlegen",removeCoach:"Coach entfernen",addingCoach:"Coach wird hinzugefügt…",team:"Team",teamsLabel:"Teams",rosterPlayers:"Spieler im Kader",catMen:"Herren",catWomen:"Damen",catMixed:"Mixed",coach:"Coach",playerType:"Spieler",removeConfirm:"{name} aus {team} entfernen?",myClubs:"Meine Clubs"},
-nl:{managerPortal:"Managerportaal",language:"Taal",signInHelp:"Log in met het e-mailadres dat aan je club is toegewezen.",email:"E-mail",password:"Wachtwoord",signIn:"Inloggen",signOut:"Uitloggen",clubOverview:"Cluboverzicht",summary:"Overzicht",summaryHelp:"Iedere persoon wordt één keer geteld volgens de club van herkomst.",teams:"Teams",clubPlayers:"Clubspelers",coaches:"Coaches",accompanying:"Begeleiders",competition:"Competitie",yourRosters:"Je rosters",rosterHelp:"Open een team om het officiële roster te bekijken en af te drukken.",players:"spelers",player:"Speler",close:"Sluiten",printRoster:"Roster afdrukken",addCoach:"Coach toevoegen",captain:"Kapitein",viceCaptain:"Vice-kapitein",fullRoster:"Volledig roster",number:"#",role:"Rol",registration:"Registratie",meals:"Maaltijden",playerHint:"Klik op een speler om kapitein, vice-kapitein of teamcoach te beheren.",jersey:"Shirtnummer",removeFromRoster:"Uit dit roster verwijderen",selectCoach:"Selecteer een speler of coach…",noCoach:"Geen coach toegewezen",notAssigned:"Niet toegewezen",complete:"Compleet",incomplete:"Onvolledig",completed:"Compleet",missing:"Ontbreekt",setCaptain:"Als kapitein instellen",removeCaptain:"Kapitein verwijderen",setVice:"Als vice-kapitein instellen",removeVice:"Vice-kapitein verwijderen",setCoach:"Als coach instellen",removeCoach:"Coach verwijderen",addingCoach:"Coach toevoegen…",team:"team",teamsLabel:"teams",rosterPlayers:"spelers in roster",catMen:"Heren",catWomen:"Dames",catMixed:"Mixed",coach:"Coach",playerType:"Speler",removeConfirm:"{name} uit {team} verwijderen?",myClubs:"Mijn clubs"},
-es:{managerPortal:"Portal de Manager",language:"Idioma",signInHelp:"Inicia sesión con el correo asignado a tu club.",email:"Correo electrónico",password:"Contraseña",signIn:"Iniciar sesión",signOut:"Cerrar sesión",clubOverview:"Resumen del club",summary:"Resumen",summaryHelp:"Cada persona se cuenta una sola vez según su club de origen.",teams:"Equipos",clubPlayers:"Jugadores del club",coaches:"Entrenadores",accompanying:"Acompañantes",competition:"Competición",yourRosters:"Tus rosters",rosterHelp:"Abre un equipo para ver e imprimir su hoja oficial de roster.",players:"jugadores",player:"Jugador",close:"Cerrar",printRoster:"Imprimir roster",addCoach:"Añadir entrenador",captain:"Capitán",viceCaptain:"Vicecapitán",fullRoster:"Roster completo",number:"#",role:"Rol",registration:"Inscripción",meals:"Comidas",playerHint:"Haz clic en un jugador para gestionar capitán, vicecapitán o entrenador del equipo.",jersey:"Camiseta",removeFromRoster:"Quitar de este roster",selectCoach:"Selecciona un jugador o entrenador…",noCoach:"Sin entrenador asignado",notAssigned:"No asignado",complete:"Completo",incomplete:"Incompleto",completed:"Completo",missing:"Pendiente",setCaptain:"Asignar como capitán",removeCaptain:"Quitar capitán",setVice:"Asignar como vicecapitán",removeVice:"Quitar vicecapitán",setCoach:"Asignar como entrenador",removeCoach:"Quitar entrenador",addingCoach:"Añadiendo entrenador…",team:"equipo",teamsLabel:"equipos",rosterPlayers:"jugadores en roster",catMen:"Hombres",catWomen:"Mujeres",catMixed:"Mixto",coach:"Entrenador",playerType:"Jugador",removeConfirm:"¿Quitar a {name} de {team}?",myClubs:"Mis clubes"},
-it:{managerPortal:"Portale Manager",language:"Lingua",signInHelp:"Accedi con l’e-mail assegnata al tuo club.",email:"E-mail",password:"Password",signIn:"Accedi",signOut:"Esci",clubOverview:"Panoramica club",summary:"Riepilogo",summaryHelp:"Ogni persona viene conteggiata una sola volta in base al club di origine.",teams:"Squadre",clubPlayers:"Giocatori del club",coaches:"Coach",accompanying:"Accompagnatori",competition:"Competizione",yourRosters:"I tuoi roster",rosterHelp:"Apri una squadra per visualizzare e stampare il roster ufficiale.",players:"giocatori",player:"Giocatore",close:"Chiudi",printRoster:"Stampa roster",addCoach:"Aggiungi coach",captain:"Capitano",viceCaptain:"Vicecapitano",fullRoster:"Roster completo",number:"#",role:"Ruolo",registration:"Registrazione",meals:"Pasti",playerHint:"Clicca su un giocatore per gestire capitano, vicecapitano o coach della squadra.",jersey:"Maglia",removeFromRoster:"Rimuovi da questo roster",selectCoach:"Seleziona un giocatore o coach…",noCoach:"Nessun coach assegnato",notAssigned:"Non assegnato",complete:"Completo",incomplete:"Incompleto",completed:"Completo",missing:"Mancante",setCaptain:"Imposta come capitano",removeCaptain:"Rimuovi capitano",setVice:"Imposta come vicecapitano",removeVice:"Rimuovi vicecapitano",setCoach:"Imposta come coach",removeCoach:"Rimuovi coach",addingCoach:"Aggiunta coach…",team:"squadra",teamsLabel:"squadre",rosterPlayers:"giocatori nel roster",catMen:"Uomini",catWomen:"Donne",catMixed:"Misto",coach:"Coach",playerType:"Giocatore",removeConfirm:"Rimuovere {name} da {team}?",myClubs:"I miei club"},
-cs:{managerPortal:"Portál manažera",language:"Jazyk",signInHelp:"Přihlaste se e-mailem přiřazeným vašemu klubu.",email:"E-mail",password:"Heslo",signIn:"Přihlásit se",signOut:"Odhlásit se",clubOverview:"Přehled klubu",summary:"Souhrn",summaryHelp:"Každá osoba se započítá pouze jednou podle svého původního klubu.",teams:"Týmy",clubPlayers:"Hráči klubu",coaches:"Trenéři",accompanying:"Doprovod",competition:"Soutěž",yourRosters:"Vaše soupisky",rosterHelp:"Otevřete tým a zobrazte nebo vytiskněte jeho oficiální soupisku.",players:"hráčů",player:"Hráč",close:"Zavřít",printRoster:"Vytisknout soupisku",addCoach:"Přidat trenéra",captain:"Kapitán",viceCaptain:"Zástupce kapitána",fullRoster:"Kompletní soupiska",number:"#",role:"Role",registration:"Registrace",meals:"Jídla",playerHint:"Klikněte na hráče pro správu kapitána, zástupce kapitána nebo trenéra týmu.",jersey:"Dres",removeFromRoster:"Odebrat ze soupisky",selectCoach:"Vyberte hráče nebo trenéra…",noCoach:"Žádný trenér není přiřazen",notAssigned:"Nepřiřazeno",complete:"Kompletní",incomplete:"Neúplná",completed:"Kompletní",missing:"Chybí",setCaptain:"Nastavit jako kapitána",removeCaptain:"Odebrat kapitána",setVice:"Nastavit jako zástupce kapitána",removeVice:"Odebrat zástupce kapitána",setCoach:"Nastavit jako trenéra",removeCoach:"Odebrat trenéra",addingCoach:"Přidávání trenéra…",team:"tým",teamsLabel:"týmy",rosterPlayers:"hráčů na soupisce",catMen:"Muži",catWomen:"Ženy",catMixed:"Mix",coach:"Trenér",playerType:"Hráč",removeConfirm:"Odebrat {name} z {team}?",myClubs:"Moje kluby"},
-hu:{managerPortal:"Manager Portál",language:"Nyelv",signInHelp:"Jelentkezz be a klubodhoz rendelt e-mail-címmel.",email:"E-mail",password:"Jelszó",signIn:"Bejelentkezés",signOut:"Kijelentkezés",clubOverview:"Klub áttekintése",summary:"Összegzés",summaryHelp:"Minden személy csak egyszer számít, a származási klubja alapján.",teams:"Csapatok",clubPlayers:"Klub játékosai",coaches:"Edzők",accompanying:"Kísérők",competition:"Verseny",yourRosters:"Csapatlistáid",rosterHelp:"Nyiss meg egy csapatot a hivatalos roster megtekintéséhez és nyomtatásához.",players:"játékos",player:"Játékos",close:"Bezárás",printRoster:"Roster nyomtatása",addCoach:"Edző hozzáadása",captain:"Csapatkapitány",viceCaptain:"Helyettes kapitány",fullRoster:"Teljes roster",number:"#",role:"Szerep",registration:"Regisztráció",meals:"Étkezések",playerHint:"Kattints egy játékosra a kapitány, helyettes kapitány vagy csapatedző szerep kezeléséhez.",jersey:"Mez",removeFromRoster:"Eltávolítás a rosterből",selectCoach:"Válassz játékost vagy edzőt…",noCoach:"Nincs kijelölt edző",notAssigned:"Nincs kijelölve",complete:"Teljes",incomplete:"Hiányos",completed:"Teljes",missing:"Hiányzik",setCaptain:"Kapitánynak kijelölés",removeCaptain:"Kapitány eltávolítása",setVice:"Helyettes kapitánynak kijelölés",removeVice:"Helyettes kapitány eltávolítása",setCoach:"Edzőnek kijelölés",removeCoach:"Edző eltávolítása",addingCoach:"Edző hozzáadása…",team:"csapat",teamsLabel:"csapatok",rosterPlayers:"játékos a rosterben",catMen:"Férfi",catWomen:"Női",catMixed:"Vegyes",coach:"Edző",playerType:"Játékos",removeConfirm:"Eltávolítod {name} játékost a(z) {team} csapatból?",myClubs:"Klubjaim"}
+const T={
+en:{managerPortal:"Manager Portal",language:"Language",signInHelp:"Sign in with the email assigned to your club.",email:"Email",password:"Password",signIn:"Sign in",signOut:"Sign out",editParticipants:"Edit participants",clubOverview:"Club overview",summary:"Summary",summaryHelp:"People are counted once according to their club of origin.",teams:"Teams",clubPlayers:"Club players",coaches:"Coaches",accompanying:"Accompanying",competition:"Competition",yourRosters:"Your rosters",rosterHelp:"Open a team to view its official roster sheet.",rosterSheet:"Official roster sheet",close:"Close",exportPdf:"Export PDF",addCoach:"Add coach",captain:"Captain",viceCaptain:"Vice-captain",teamSheet:"Team sheet",fullRoster:"Full roster",players:"players",player:"Player",role:"Role",registration:"Registration",meals:"Meals",playerHint:"Click a player to manage captain, vice-captain or coach roles.",clubManagement:"Club management",participantsHelp:"Players, coaches and accompanying people linked to your club.",all:"All",playersTitle:"Players",editParticipant:"Edit participant",firstName:"First name",lastName:"Last name",jersey:"Jersey number",teamsAndRoles:"Teams & roles",cancel:"Cancel",saveChanges:"Save changes",removeFromRoster:"Remove from roster",selectCoach:"Select a player or coach…",noCoach:"No coach assigned",notAssigned:"Not assigned",complete:"Complete",incomplete:"Incomplete",completed:"Complete",missing:"Missing",setCaptain:"Set as captain",removeCaptain:"Remove captain",setVice:"Set as vice-captain",removeVice:"Remove vice-captain",setCoach:"Set as coach",removeCoach:"Remove coach",addingCoach:"Adding coach…",team:"team",teamsLabel:"teams",catMen:"Men",catWomen:"Women",catMixed:"Mixed",coach:"Coach",other:"Accompanying",edit:"Edit",noMeal:"No meal",sandwich:"Sandwich",hotMeal:"Hot meal",priority1:"Priority 1",priority2:"Priority 2",vegetarian:"Vegetarian",chicken:"Chicken",beef_pork:"Beef / Pork",fish_seafood:"Fish / Seafood",saving:"Saving…",saved:"Changes saved.",pdfError:"The PDF could not be generated.",participantType:"Type"},
+fr:{managerPortal:"Portail Manager",language:"Langue",signInHelp:"Connectez-vous avec l’adresse e-mail attribuée à votre club.",email:"E-mail",password:"Mot de passe",signIn:"Se connecter",signOut:"Se déconnecter",editParticipants:"Modifier les participants",clubOverview:"Aperçu du club",summary:"Résumé",summaryHelp:"Chaque personne est comptée une seule fois selon son club d’origine.",teams:"Équipes",clubPlayers:"Joueurs du club",coaches:"Coachs",accompanying:"Accompagnants",competition:"Compétition",yourRosters:"Vos rosters",rosterHelp:"Ouvrez une équipe pour consulter sa feuille de roster officielle.",rosterSheet:"Feuille de roster officielle",close:"Fermer",exportPdf:"Exporter PDF",addCoach:"Ajouter un coach",captain:"Capitaine",viceCaptain:"Vice-capitaine",teamSheet:"Feuille d’équipe",fullRoster:"Roster complet",players:"joueurs",player:"Joueur",role:"Rôle",registration:"Inscription",meals:"Repas",playerHint:"Cliquez sur un joueur pour gérer les rôles de capitaine, vice-capitaine ou coach.",clubManagement:"Gestion du club",participantsHelp:"Joueurs, coachs et accompagnants rattachés à votre club.",all:"Tous",playersTitle:"Joueurs",editParticipant:"Modifier le participant",firstName:"Prénom",lastName:"Nom",jersey:"Numéro de maillot",teamsAndRoles:"Équipes & rôles",cancel:"Annuler",saveChanges:"Enregistrer",removeFromRoster:"Retirer du roster",selectCoach:"Sélectionner un joueur ou un coach…",noCoach:"Aucun coach assigné",notAssigned:"Non assigné",complete:"Complet",incomplete:"Incomplet",completed:"Complet",missing:"Manquant",setCaptain:"Définir comme capitaine",removeCaptain:"Retirer capitaine",setVice:"Définir comme vice-capitaine",removeVice:"Retirer vice-capitaine",setCoach:"Définir comme coach",removeCoach:"Retirer coach",addingCoach:"Ajout du coach…",team:"équipe",teamsLabel:"équipes",catMen:"Hommes",catWomen:"Femmes",catMixed:"Mixte",coach:"Coach",other:"Accompagnant",edit:"Modifier",noMeal:"Pas de repas",sandwich:"Sandwich",hotMeal:"Repas chaud",priority1:"Priorité 1",priority2:"Priorité 2",vegetarian:"Végétarien",chicken:"Poulet",beef_pork:"Bœuf / Porc",fish_seafood:"Poisson / Fruits de mer",saving:"Enregistrement…",saved:"Modifications enregistrées.",pdfError:"Le PDF n’a pas pu être généré.",participantType:"Type"},
+de:{managerPortal:"Manager-Portal",language:"Sprache",signInHelp:"Melde dich mit der deinem Club zugewiesenen E-Mail-Adresse an.",email:"E-Mail",password:"Passwort",signIn:"Anmelden",signOut:"Abmelden",editParticipants:"Teilnehmer bearbeiten",clubOverview:"Clubübersicht",summary:"Übersicht",summaryHelp:"Jede Person wird anhand ihres Herkunftsclubs nur einmal gezählt.",teams:"Teams",clubPlayers:"Clubspieler",coaches:"Coaches",accompanying:"Begleitpersonen",competition:"Wettbewerb",yourRosters:"Deine Kader",rosterHelp:"Öffne ein Team, um den offiziellen Kader anzusehen.",rosterSheet:"Offizielles Teamblatt",close:"Schließen",exportPdf:"PDF exportieren",addCoach:"Coach hinzufügen",captain:"Kapitän",viceCaptain:"Vizekapitän",teamSheet:"Teamblatt",fullRoster:"Gesamter Kader",players:"Spieler",player:"Spieler",role:"Rolle",registration:"Anmeldung",meals:"Mahlzeiten",playerHint:"Klicke auf einen Spieler, um Kapitän, Vizekapitän oder Coach zu verwalten.",clubManagement:"Clubverwaltung",participantsHelp:"Spieler, Coaches und Begleitpersonen deines Clubs.",all:"Alle",playersTitle:"Spieler",editParticipant:"Teilnehmer bearbeiten",firstName:"Vorname",lastName:"Nachname",jersey:"Trikotnummer",teamsAndRoles:"Teams & Rollen",cancel:"Abbrechen",saveChanges:"Speichern",removeFromRoster:"Aus Kader entfernen",selectCoach:"Spieler oder Coach auswählen…",noCoach:"Kein Coach zugewiesen",notAssigned:"Nicht zugewiesen",complete:"Vollständig",incomplete:"Unvollständig",completed:"Vollständig",missing:"Fehlt",setCaptain:"Als Kapitän festlegen",removeCaptain:"Kapitän entfernen",setVice:"Als Vizekapitän festlegen",removeVice:"Vizekapitän entfernen",setCoach:"Als Coach festlegen",removeCoach:"Coach entfernen",addingCoach:"Coach wird hinzugefügt…",team:"Team",teamsLabel:"Teams",catMen:"Herren",catWomen:"Damen",catMixed:"Mixed",coach:"Coach",other:"Begleitung",edit:"Bearbeiten",noMeal:"Keine Mahlzeit",sandwich:"Sandwich",hotMeal:"Warme Mahlzeit",priority1:"Priorität 1",priority2:"Priorität 2",vegetarian:"Vegetarisch",chicken:"Hähnchen",beef_pork:"Rind / Schwein",fish_seafood:"Fisch / Meeresfrüchte",saving:"Speichern…",saved:"Änderungen gespeichert.",pdfError:"PDF konnte nicht erstellt werden.",participantType:"Typ"},
+nl:{managerPortal:"Managerportaal",language:"Taal",signInHelp:"Log in met het e-mailadres dat aan je club is toegewezen.",email:"E-mail",password:"Wachtwoord",signIn:"Inloggen",signOut:"Uitloggen",editParticipants:"Deelnemers bewerken",clubOverview:"Cluboverzicht",summary:"Overzicht",summaryHelp:"Iedere persoon wordt één keer geteld volgens de club van herkomst.",teams:"Teams",clubPlayers:"Clubspelers",coaches:"Coaches",accompanying:"Begeleiders",competition:"Competitie",yourRosters:"Je rosters",rosterHelp:"Open een team om het officiële roster te bekijken.",rosterSheet:"Officieel rosterblad",close:"Sluiten",exportPdf:"PDF exporteren",addCoach:"Coach toevoegen",captain:"Kapitein",viceCaptain:"Vice-kapitein",teamSheet:"Teamblad",fullRoster:"Volledig roster",players:"spelers",player:"Speler",role:"Rol",registration:"Registratie",meals:"Maaltijden",playerHint:"Klik op een speler om kapitein, vice-kapitein of coach te beheren.",clubManagement:"Clubbeheer",participantsHelp:"Spelers, coaches en begeleiders van je club.",all:"Alle",playersTitle:"Spelers",editParticipant:"Deelnemer bewerken",firstName:"Voornaam",lastName:"Achternaam",jersey:"Shirtnummer",teamsAndRoles:"Teams & rollen",cancel:"Annuleren",saveChanges:"Opslaan",removeFromRoster:"Uit roster verwijderen",selectCoach:"Selecteer speler of coach…",noCoach:"Geen coach toegewezen",notAssigned:"Niet toegewezen",complete:"Compleet",incomplete:"Onvolledig",completed:"Compleet",missing:"Ontbreekt",setCaptain:"Als kapitein instellen",removeCaptain:"Kapitein verwijderen",setVice:"Als vice-kapitein instellen",removeVice:"Vice-kapitein verwijderen",setCoach:"Als coach instellen",removeCoach:"Coach verwijderen",addingCoach:"Coach toevoegen…",team:"team",teamsLabel:"teams",catMen:"Heren",catWomen:"Dames",catMixed:"Mixed",coach:"Coach",other:"Begeleider",edit:"Bewerken",noMeal:"Geen maaltijd",sandwich:"Sandwich",hotMeal:"Warme maaltijd",priority1:"Prioriteit 1",priority2:"Prioriteit 2",vegetarian:"Vegetarisch",chicken:"Kip",beef_pork:"Rund / Varken",fish_seafood:"Vis / Zeevruchten",saving:"Opslaan…",saved:"Wijzigingen opgeslagen.",pdfError:"PDF kon niet worden gemaakt.",participantType:"Type"},
+es:{managerPortal:"Portal de Manager",language:"Idioma",signInHelp:"Inicia sesión con el correo asignado a tu club.",email:"Correo",password:"Contraseña",signIn:"Iniciar sesión",signOut:"Cerrar sesión",editParticipants:"Editar participantes",clubOverview:"Resumen del club",summary:"Resumen",summaryHelp:"Cada persona se cuenta una sola vez según su club de origen.",teams:"Equipos",clubPlayers:"Jugadores del club",coaches:"Entrenadores",accompanying:"Acompañantes",competition:"Competición",yourRosters:"Tus rosters",rosterHelp:"Abre un equipo para ver su hoja oficial.",rosterSheet:"Hoja oficial del equipo",close:"Cerrar",exportPdf:"Exportar PDF",addCoach:"Añadir entrenador",captain:"Capitán",viceCaptain:"Vicecapitán",teamSheet:"Hoja de equipo",fullRoster:"Roster completo",players:"jugadores",player:"Jugador",role:"Rol",registration:"Inscripción",meals:"Comidas",playerHint:"Haz clic en un jugador para gestionar capitán, vicecapitán o entrenador.",clubManagement:"Gestión del club",participantsHelp:"Jugadores, entrenadores y acompañantes vinculados a tu club.",all:"Todos",playersTitle:"Jugadores",editParticipant:"Editar participante",firstName:"Nombre",lastName:"Apellido",jersey:"Número",teamsAndRoles:"Equipos y roles",cancel:"Cancelar",saveChanges:"Guardar",removeFromRoster:"Quitar del roster",selectCoach:"Selecciona jugador o entrenador…",noCoach:"Sin entrenador asignado",notAssigned:"No asignado",complete:"Completo",incomplete:"Incompleto",completed:"Completo",missing:"Pendiente",setCaptain:"Asignar capitán",removeCaptain:"Quitar capitán",setVice:"Asignar vicecapitán",removeVice:"Quitar vicecapitán",setCoach:"Asignar entrenador",removeCoach:"Quitar entrenador",addingCoach:"Añadiendo entrenador…",team:"equipo",teamsLabel:"equipos",catMen:"Hombres",catWomen:"Mujeres",catMixed:"Mixto",coach:"Entrenador",other:"Acompañante",edit:"Editar",noMeal:"Sin comida",sandwich:"Sándwich",hotMeal:"Comida caliente",priority1:"Prioridad 1",priority2:"Prioridad 2",vegetarian:"Vegetariano",chicken:"Pollo",beef_pork:"Ternera / Cerdo",fish_seafood:"Pescado / Marisco",saving:"Guardando…",saved:"Cambios guardados.",pdfError:"No se pudo generar el PDF.",participantType:"Tipo"},
+it:{managerPortal:"Portale Manager",language:"Lingua",signInHelp:"Accedi con l’e-mail assegnata al tuo club.",email:"E-mail",password:"Password",signIn:"Accedi",signOut:"Esci",editParticipants:"Modifica partecipanti",clubOverview:"Panoramica club",summary:"Riepilogo",summaryHelp:"Ogni persona viene conteggiata una sola volta in base al club di origine.",teams:"Squadre",clubPlayers:"Giocatori del club",coaches:"Coach",accompanying:"Accompagnatori",competition:"Competizione",yourRosters:"I tuoi roster",rosterHelp:"Apri una squadra per vedere il roster ufficiale.",rosterSheet:"Foglio roster ufficiale",close:"Chiudi",exportPdf:"Esporta PDF",addCoach:"Aggiungi coach",captain:"Capitano",viceCaptain:"Vicecapitano",teamSheet:"Foglio squadra",fullRoster:"Roster completo",players:"giocatori",player:"Giocatore",role:"Ruolo",registration:"Registrazione",meals:"Pasti",playerHint:"Clicca su un giocatore per gestire capitano, vicecapitano o coach.",clubManagement:"Gestione club",participantsHelp:"Giocatori, coach e accompagnatori collegati al club.",all:"Tutti",playersTitle:"Giocatori",editParticipant:"Modifica partecipante",firstName:"Nome",lastName:"Cognome",jersey:"Numero maglia",teamsAndRoles:"Squadre e ruoli",cancel:"Annulla",saveChanges:"Salva",removeFromRoster:"Rimuovi dal roster",selectCoach:"Seleziona giocatore o coach…",noCoach:"Nessun coach assegnato",notAssigned:"Non assegnato",complete:"Completo",incomplete:"Incompleto",completed:"Completo",missing:"Mancante",setCaptain:"Imposta capitano",removeCaptain:"Rimuovi capitano",setVice:"Imposta vicecapitano",removeVice:"Rimuovi vicecapitano",setCoach:"Imposta coach",removeCoach:"Rimuovi coach",addingCoach:"Aggiunta coach…",team:"squadra",teamsLabel:"squadre",catMen:"Uomini",catWomen:"Donne",catMixed:"Misto",coach:"Coach",other:"Accompagnatore",edit:"Modifica",noMeal:"Nessun pasto",sandwich:"Panino",hotMeal:"Pasto caldo",priority1:"Priorità 1",priority2:"Priorità 2",vegetarian:"Vegetariano",chicken:"Pollo",beef_pork:"Manzo / Maiale",fish_seafood:"Pesce / Frutti di mare",saving:"Salvataggio…",saved:"Modifiche salvate.",pdfError:"Impossibile generare il PDF.",participantType:"Tipo"},
+cs:{managerPortal:"Portál manažera",language:"Jazyk",signInHelp:"Přihlaste se e-mailem přiřazeným vašemu klubu.",email:"E-mail",password:"Heslo",signIn:"Přihlásit se",signOut:"Odhlásit se",editParticipants:"Upravit účastníky",clubOverview:"Přehled klubu",summary:"Souhrn",summaryHelp:"Každá osoba se započítá pouze jednou podle svého původního klubu.",teams:"Týmy",clubPlayers:"Hráči klubu",coaches:"Trenéři",accompanying:"Doprovod",competition:"Soutěž",yourRosters:"Vaše soupisky",rosterHelp:"Otevřete tým a zobrazte oficiální soupisku.",rosterSheet:"Oficiální soupiska",close:"Zavřít",exportPdf:"Export PDF",addCoach:"Přidat trenéra",captain:"Kapitán",viceCaptain:"Zástupce kapitána",teamSheet:"Týmový list",fullRoster:"Kompletní soupiska",players:"hráčů",player:"Hráč",role:"Role",registration:"Registrace",meals:"Jídla",playerHint:"Klikněte na hráče pro správu kapitána, zástupce kapitána nebo trenéra.",clubManagement:"Správa klubu",participantsHelp:"Hráči, trenéři a doprovod vašeho klubu.",all:"Všichni",playersTitle:"Hráči",editParticipant:"Upravit účastníka",firstName:"Jméno",lastName:"Příjmení",jersey:"Číslo dresu",teamsAndRoles:"Týmy a role",cancel:"Zrušit",saveChanges:"Uložit",removeFromRoster:"Odebrat ze soupisky",selectCoach:"Vyberte hráče nebo trenéra…",noCoach:"Žádný trenér",notAssigned:"Nepřiřazeno",complete:"Kompletní",incomplete:"Neúplná",completed:"Kompletní",missing:"Chybí",setCaptain:"Nastavit kapitána",removeCaptain:"Odebrat kapitána",setVice:"Nastavit zástupce",removeVice:"Odebrat zástupce",setCoach:"Nastavit trenéra",removeCoach:"Odebrat trenéra",addingCoach:"Přidávání trenéra…",team:"tým",teamsLabel:"týmy",catMen:"Muži",catWomen:"Ženy",catMixed:"Mix",coach:"Trenér",other:"Doprovod",edit:"Upravit",noMeal:"Bez jídla",sandwich:"Sendvič",hotMeal:"Teplé jídlo",priority1:"Priorita 1",priority2:"Priorita 2",vegetarian:"Vegetariánské",chicken:"Kuře",beef_pork:"Hovězí / Vepřové",fish_seafood:"Ryby / Mořské plody",saving:"Ukládání…",saved:"Změny uloženy.",pdfError:"PDF se nepodařilo vytvořit.",participantType:"Typ"},
+hu:{managerPortal:"Manager Portál",language:"Nyelv",signInHelp:"Jelentkezz be a klubodhoz rendelt e-mail-címmel.",email:"E-mail",password:"Jelszó",signIn:"Bejelentkezés",signOut:"Kijelentkezés",editParticipants:"Résztvevők szerkesztése",clubOverview:"Klub áttekintése",summary:"Összegzés",summaryHelp:"Minden személy csak egyszer számít, a származási klubja alapján.",teams:"Csapatok",clubPlayers:"Klub játékosai",coaches:"Edzők",accompanying:"Kísérők",competition:"Verseny",yourRosters:"Csapatlistáid",rosterHelp:"Nyiss meg egy csapatot a hivatalos roster megtekintéséhez.",rosterSheet:"Hivatalos roster",close:"Bezárás",exportPdf:"PDF exportálás",addCoach:"Edző hozzáadása",captain:"Csapatkapitány",viceCaptain:"Helyettes kapitány",teamSheet:"Csapatlap",fullRoster:"Teljes roster",players:"játékos",player:"Játékos",role:"Szerep",registration:"Regisztráció",meals:"Étkezések",playerHint:"Kattints egy játékosra a kapitány, helyettes kapitány vagy edző kezeléséhez.",clubManagement:"Klubkezelés",participantsHelp:"A klubhoz tartozó játékosok, edzők és kísérők.",all:"Mind",playersTitle:"Játékosok",editParticipant:"Résztvevő szerkesztése",firstName:"Keresztnév",lastName:"Vezetéknév",jersey:"Mezszám",teamsAndRoles:"Csapatok és szerepek",cancel:"Mégse",saveChanges:"Mentés",removeFromRoster:"Eltávolítás a rosterből",selectCoach:"Válassz játékost vagy edzőt…",noCoach:"Nincs kijelölt edző",notAssigned:"Nincs kijelölve",complete:"Teljes",incomplete:"Hiányos",completed:"Teljes",missing:"Hiányzik",setCaptain:"Kapitánynak kijelölés",removeCaptain:"Kapitány eltávolítása",setVice:"Helyettes kapitánynak kijelölés",removeVice:"Helyettes kapitány eltávolítása",setCoach:"Edzőnek kijelölés",removeCoach:"Edző eltávolítása",addingCoach:"Edző hozzáadása…",team:"csapat",teamsLabel:"csapatok",catMen:"Férfi",catWomen:"Női",catMixed:"Vegyes",coach:"Edző",other:"Kísérő",edit:"Szerkesztés",noMeal:"Nincs étkezés",sandwich:"Szendvics",hotMeal:"Meleg étel",priority1:"1. prioritás",priority2:"2. prioritás",vegetarian:"Vegetáriánus",chicken:"Csirke",beef_pork:"Marha / Sertés",fish_seafood:"Hal / Tenger gyümölcsei",saving:"Mentés…",saved:"Módosítások mentve.",pdfError:"A PDF létrehozása sikertelen.",participantType:"Típus"}
 };
-
-function t(k){return I18N[lang]?.[k]||I18N.en[k]||k}
+function t(k){return T[lang]?.[k]||T.en[k]||k}
 function catLabel(c){return c==="Men"?t("catMen"):c==="Women"?t("catWomen"):c==="Mixed"?t("catMixed"):c}
-function setLang(v){
-  if(!I18N[v])v="en";
-  lang=v; localStorage.setItem("isdo_manager_lang",lang);
-  document.documentElement.lang=lang;
-  ["loginLanguage","dashboardLanguage"].forEach(id=>{if($(id))$(id).value=lang});
-  document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=t(el.dataset.i18n)});
-  if(currentData)render(currentData);
-}
+function setLang(v){lang=T[v]?v:"en";localStorage.setItem("isdo_manager_lang",lang);document.documentElement.lang=lang;["loginLanguage","dashboardLanguage"].forEach(id=>{if($(id))$(id).value=lang});document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=t(el.dataset.i18n));if(currentData)renderAll()}
 
-document.addEventListener("DOMContentLoaded",async()=>{
-  bind();
-  setLang(lang);
-  const r=await db.auth.getSession();
-  session=r.data.session;
-  if(session)load();
-});
-
+document.addEventListener("DOMContentLoaded",async()=>{bind();setLang(lang);const r=await db.auth.getSession();session=r.data.session;if(session)load()});
 function bind(){
-  $("loginForm").onsubmit=login;
-  $("logout").onclick=()=>db.auth.signOut();
-  $("loginLanguage").onchange=e=>setLang(e.target.value);
-  $("dashboardLanguage").onchange=e=>setLang(e.target.value);
-  $("closeDialog").onclick=()=>$("playerDialog").close();
-  $("closeTeamSheet").onclick=()=>$("teamSheetDialog").close();
-  $("printTeamSheet").onclick=()=>{ $("printGenerated").textContent=new Date().toLocaleString(); window.print(); };
-  $("captainBtn").onclick=()=>role("captain");
-  $("viceBtn").onclick=()=>role("vice_captain");
-  $("coachBtn").onclick=toggleCoach;
-  $("removeBtn").onclick=remove;
-  $("addCoachButton").onclick=addCoachFromSheet;
-  db.auth.onAuthStateChange((_e,s)=>{session=s;s?load():showLogin()});
+ $("loginForm").onsubmit=login;$("logout").onclick=()=>db.auth.signOut();
+ $("loginLanguage").onchange=e=>setLang(e.target.value);$("dashboardLanguage").onchange=e=>setLang(e.target.value);
+ $("editParticipantsButton").onclick=()=>{renderParticipants();$("participantListDialog").showModal()};
+ $("closeParticipants").onclick=()=>$("participantListDialog").close();
+ $("closeParticipantEdit").onclick=$("cancelParticipantEdit").onclick=()=>$("participantEditDialog").close();
+ document.querySelectorAll(".filter-chip").forEach(b=>b.onclick=()=>{participantFilter=b.dataset.filter;document.querySelectorAll(".filter-chip").forEach(x=>x.classList.toggle("active",x===b));renderParticipants()});
+ $("participantEditForm").onsubmit=saveParticipant;
+ $("closeTeamSheet").onclick=()=>$("teamSheetDialog").close();$("exportPdfButton").onclick=exportPdf;
+ $("addCoachButton").onclick=addCoach;$("closeDialog").onclick=()=>$("playerDialog").close();
+ $("captainBtn").onclick=()=>role("captain");$("viceBtn").onclick=()=>role("vice_captain");$("coachBtn").onclick=toggleCoach;$("removeBtn").onclick=removeFromRoster;
+ db.auth.onAuthStateChange((_e,s)=>{session=s;s?load():showLogin()});
 }
-
-async function login(ev){
-  ev.preventDefault();
-  const {error}=await db.auth.signInWithPassword({email:$("email").value.trim().toLowerCase(),password:$("password").value});
-  if(error){$("loginMsg").textContent=error.message;$("loginMsg").classList.remove("hidden")}
+async function login(ev){ev.preventDefault();const {error}=await db.auth.signInWithPassword({email:$("email").value.trim().toLowerCase(),password:$("password").value});if(error){$("loginMsg").textContent=error.message;$("loginMsg").classList.remove("hidden")}}
+function showLogin(){$("dashboard").classList.add("hidden");$("login").classList.remove("hidden")}
+async function api(url,opt={}){const r=await fetch(url,{...opt,headers:{...(opt.headers||{}),"Content-Type":"application/json",Authorization:`Bearer ${session.access_token}`}});const d=await r.json();if(!r.ok)throw new Error(d.error||"Request failed");return d}
+async function load(){$("login").classList.add("hidden");$("dashboard").classList.remove("hidden");try{currentData=await api("/api/manager-roster");renderAll()}catch(e){alert(e.message)}}
+function renderAll(){if(!currentData)return;renderHeader();renderTeams();document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=t(el.dataset.i18n));if(currentTeam){const fresh=currentData.teams.find(x=>x.id===currentTeam.id);if(fresh){currentTeam=fresh;renderSheet(fresh)}}}
+function renderHeader(){const d=currentData;$("clubName").textContent=d.clubs.length===1?d.clubs[0].name:"My Clubs";$("managerEmail").textContent=d.manager_email||"";$("teamCount").textContent=d.club_summary.teams;$("clubPlayerCount").textContent=d.club_summary.players;$("coachCount").textContent=d.club_summary.coaches;$("otherCount").textContent=d.club_summary.others}
+function renderTeams(){const host=$("teams");host.innerHTML="";const order=["Men","Women","Mixed"];[...new Set(currentData.teams.map(x=>x.category))].sort((a,b)=>(order.indexOf(a)<0?99:order.indexOf(a))-(order.indexOf(b)<0?99:order.indexOf(b))).forEach(cat=>{const arr=currentData.teams.filter(x=>x.category===cat).sort((a,b)=>a.team_name.localeCompare(b.team_name));const s=document.createElement("section");s.className="category-block";s.innerHTML=`<div class="category-head"><h3>${esc(catLabel(cat))}</h3><span class="category-count">${arr.length} ${esc(arr.length===1?t("team"):t("teamsLabel"))}</span></div><div class="team-grid"></div>`;const g=s.querySelector(".team-grid");arr.forEach(team=>{const c=document.createElement("article");c.className="team-card";c.innerHTML=`<button class="team-open" type="button"><div><div class="team-label">${esc(catLabel(team.category))}</div><div class="team-name">${esc(team.team_name)}</div></div><div class="team-side"><strong>${team.players.length}</strong><span>${esc(t("players"))}</span><div class="arrow">→</div></div></button>`;c.querySelector("button").onclick=()=>openTeam(team);g.appendChild(c)});host.appendChild(s)})}
+function openTeam(team){currentTeam=team;renderSheet(team);$("teamSheetDialog").showModal()}
+function sortedPlayers(a){return[...a].sort((x,y)=>jersey(x.jersey_number)-jersey(y.jersey_number)||`${x.last_name} ${x.first_name}`.localeCompare(`${y.last_name} ${y.first_name}`))}
+function jersey(v){if(v===null||v===undefined||v==="")return 9999;const n=parseInt(String(v).replace(/\D/g,""),10);return Number.isNaN(n)?9999:n}
+function renderSheet(team){
+ $("sheetCategory").textContent=catLabel(team.category);$("sheetTeamName").textContent=team.team_name;$("sheetClubName").textContent=team.managing_club_name||"";
+ const logo=team.logo_url||team.club_logo_url||"/assets/isdo27-logo.png";$("sheetTeamLogo").src=logo;$("sheetTeamLogo").onerror=()=>{$("sheetTeamLogo").src="/assets/isdo27-logo.png"};
+ const ps=sortedPlayers(team.players);$("sheetPlayerCount").textContent=ps.length;renderCoaches(team);renderLeader($("captainCard"),ps.find(x=>x.captain),t("captain"));renderLeader($("viceCaptainCard"),ps.find(x=>x.vice_captain),t("viceCaptain"));
+ $("sheetRosterBody").innerHTML=ps.map(p=>`<tr class="roster-row" data-id="${p.id}"><td><strong>#${esc(p.jersey_number||"—")}</strong></td><td class="player-name">${esc(p.first_name)} ${esc(p.last_name)}</td><td>${p.captain?'<span class="badge role">C</span> ':''}${p.vice_captain?'<span class="badge role">VC</span> ':''}${p.is_team_coach?`<span class="badge role">${esc(t("coach"))}</span>`:""}</td><td><span class="badge ${p.registration_complete?"ok":"warn"}">${esc(p.registration_complete?t("complete"):t("incomplete"))}</span></td><td><span class="badge ${p.meals_complete?"ok":"warn"}">${esc(p.meals_complete?t("completed"):t("missing"))}</span></td></tr>`).join("");
+ document.querySelectorAll("#sheetRosterBody .roster-row").forEach(r=>r.onclick=()=>{const p=ps.find(x=>x.id===r.dataset.id);openPlayer(team,p)});
 }
-
-function showLogin(){
-  $("dashboard").classList.add("hidden");
-  $("login").classList.remove("hidden");
-}
-
-async function api(url,opt={}){
-  const r=await fetch(url,{...opt,headers:{...(opt.headers||{}),"Content-Type":"application/json",Authorization:`Bearer ${session.access_token}`}});
-  const d=await r.json();
-  if(!r.ok)throw new Error(d.error||"Request failed");
-  return d;
-}
-
-async function load(){
-  $("login").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");
-  try{currentData=await api("/api/manager-roster");render(currentData)}
-  catch(e){alert(e.message)}
-}
-
-function render(d){
-  $("clubName").textContent=d.clubs.length===1?d.clubs[0].name:t("myClubs");
-  $("managerEmail").textContent=d.manager_email||"";
-  const summary=d.club_summary||fallbackSummary(d);
-  $("teamCount").textContent=summary.teams??d.teams.length;
-  $("clubPlayerCount").textContent=summary.players??0;
-  $("coachCount").textContent=summary.coaches??0;
-  $("otherCount").textContent=summary.others??0;
-  renderTeamGroups(d.teams||[]);
-  document.querySelectorAll("[data-i18n]").forEach(el=>{el.textContent=t(el.dataset.i18n)});
-  if(currentTeam){
-    const fresh=(d.teams||[]).find(x=>x.id===currentTeam.id);
-    if(fresh){currentTeam=fresh;renderTeamSheet(fresh)}
-  }
-}
-
-function fallbackSummary(d){
-  const ids=new Set(),coaches=new Set();
-  (d.teams||[]).forEach(team=>{
-    (team.players||[]).forEach(p=>ids.add(p.id));
-    (team.coaches||[]).forEach(c=>coaches.add(c.id));
-  });
-  return{teams:(d.teams||[]).length,players:ids.size,coaches:coaches.size,others:0};
-}
-
-function renderTeamGroups(teams){
-  const host=$("teams");host.innerHTML="";
-  const order=["Men","Women","Mixed"];
-  const categories=[...new Set(teams.map(x=>x.category))].sort((a,b)=>{
-    const ai=order.indexOf(a),bi=order.indexOf(b);
-    return (ai<0?99:ai)-(bi<0?99:bi)||String(a).localeCompare(String(b));
-  });
-  if(!categories.length){host.innerHTML=`<div class="card auth">${esc(t("notAssigned"))}</div>`;return}
-  categories.forEach(category=>{
-    const group=teams.filter(x=>x.category===category);
-    const section=document.createElement("section");section.className="category-section";
-    section.innerHTML=`<div class="category-header"><h3>${esc(catLabel(category))}</h3><span class="category-count">${group.length} ${esc(group.length===1?t("team"):t("teamsLabel"))}</span></div><div class="category-team-grid"></div>`;
-    const grid=section.querySelector(".category-team-grid");
-    group.sort((a,b)=>a.team_name.localeCompare(b.team_name)).forEach(team=>{
-      const card=document.createElement("article");card.className="team-launch-card";
-      card.innerHTML=`<button type="button" class="team-launch-button"><div class="team-name-wrap"><small>${esc(catLabel(team.category))}</small><strong>${esc(team.team_name)}</strong></div><div class="team-card-meta"><strong>${(team.players||[]).length}</strong><span>${esc(t("players"))}</span><span class="open-arrow">→</span></div></button>`;
-      card.querySelector("button").onclick=()=>openTeam(team);
-      grid.appendChild(card);
-    });
-    host.appendChild(section);
-  });
-}
-
-function openTeam(team){
-  currentTeam=team;
-  renderTeamSheet(team);
-  $("teamSheetDialog").showModal();
-}
-
-function renderTeamSheet(team){
-  $("sheetCategory").textContent=catLabel(team.category);
-  $("sheetTeamName").textContent=team.team_name;
-  const club=currentData?.clubs?.find(c=>c.id===team.managing_club_id);
-  $("sheetClubName").textContent=club?.name||"";
-  const players=sortedPlayers(team.players||[]);
-  $("sheetPlayerCount").textContent=players.length;
-  $("sheetRosterMeta").textContent=`${players.length} ${t("rosterPlayers")}`;
-  renderCoaches(team);
-  renderLeadership(players);
-  renderRoster(team,players);
-}
-
-function renderCoaches(team){
-  const coaches=team.coaches||[];
-  $("coachCountLabel").textContent=coaches.length?`(${coaches.length})`:"";
-  const box=$("sheetCoaches");box.innerHTML="";
-  if(!coaches.length){box.innerHTML=`<span class="coach-empty">${esc(t("noCoach"))}</span>`}
-  else coaches.forEach(coach=>{
-    const chip=document.createElement("span");chip.className="coach-chip";
-    chip.innerHTML=`<span>${esc(coach.first_name)} ${esc(coach.last_name)}</span><button class="no-print" type="button" title="${esc(t("removeCoach"))}">×</button>`;
-    chip.querySelector("button").onclick=async()=>{
-      await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:"remove_coach_assignment",team_id:team.id,participant_id:coach.id})});
-      await load();
-    };
-    box.appendChild(chip);
-  });
-  const select=$("coachCandidateSelect");select.innerHTML=`<option value="">${esc(t("selectCoach"))}</option>`;
-  const currentIds=new Set(coaches.map(x=>x.id));
-  (team.coach_candidates||[]).filter(x=>!currentIds.has(x.id)).forEach(p=>{
-    const kind=p.participant_type==="coach"?t("coach"):t("playerType");
-    const jersey=p.jersey_number?` · #${p.jersey_number}`:"";
-    select.add(new Option(`${p.last_name} ${p.first_name} · ${kind}${jersey}`,p.id));
-  });
-  $("addCoachButton").disabled=select.options.length<=1;
-  $("coachActionMessage").textContent="";
-}
-
-async function addCoachFromSheet(){
-  if(!currentTeam)return;
-  const id=$("coachCandidateSelect").value;if(!id)return;
-  try{
-    $("coachActionMessage").textContent=t("addingCoach");
-    await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:"add_coach_assignment",team_id:currentTeam.id,participant_id:id})});
-    await load();
-  }catch(e){$("coachActionMessage").textContent=e.message}
-}
-
-function renderLeadership(players){
-  renderLeader($("captainCard"),players.find(x=>x.captain),t("captain"));
-  renderLeader($("viceCaptainCard"),players.find(x=>x.vice_captain),t("viceCaptain"));
-}
-
-function renderLeader(host,p,label){
-  if(!p){host.innerHTML=`<div class="leader-empty">${esc(t("notAssigned"))}</div>`;return}
-  host.innerHTML=`<div class="leader-person"><div class="leader-number">#${esc(p.jersey_number||"—")}</div><div><div class="leader-name">${esc(p.first_name)} ${esc(p.last_name)}</div><span class="badge role">${esc(label)}</span></div></div>`;
-}
-
-function renderRoster(team,players){
-  const body=$("sheetRosterBody");body.innerHTML="";
-  if(!players.length){body.innerHTML=`<tr><td colspan="5">${esc(t("notAssigned"))}</td></tr>`;return}
-  players.forEach(p=>{
-    const roles=[];
-    if(p.captain)roles.push(`<span class="badge role">C</span>`);
-    if(p.vice_captain)roles.push(`<span class="badge role">VC</span>`);
-    if(p.is_team_coach)roles.push(`<span class="badge role">${esc(t("coach"))}</span>`);
-    const tr=document.createElement("tr");tr.className="sheet-player-row";
-    tr.innerHTML=`<td><strong>#${esc(p.jersey_number||"—")}</strong></td><td class="sheet-player-name">${esc(p.first_name)} ${esc(p.last_name)}</td><td><div class="sheet-role-badges">${roles.join("")||"—"}</div></td><td class="no-print"><span class="badge ${p.registration_complete?"ok":"warn"}">${esc(p.registration_complete?t("complete"):t("incomplete"))}</span></td><td class="no-print"><span class="badge ${p.meals_complete?"ok":"warn"}">${esc(p.meals_complete?t("completed"):t("missing"))}</span></td>`;
-    tr.onclick=()=>openPlayer(team,p);
-    body.appendChild(tr);
-  });
-}
-
-function sortedPlayers(list){
-  return [...list].sort((a,b)=>{const an=jerseyNumber(a.jersey_number),bn=jerseyNumber(b.jersey_number);return an-bn||`${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`)});
-}
-function jerseyNumber(v){if(v===null||v===undefined||v==="")return Number.MAX_SAFE_INTEGER;const n=parseInt(String(v).replace(/\D/g,""),10);return Number.isNaN(n)?Number.MAX_SAFE_INTEGER:n}
-
-function openPlayer(team,p){
-  selected={t:team,p};
-  $("dCat").textContent=catLabel(team.category);
-  $("dName").textContent=`${p.first_name} ${p.last_name}`;
-  $("dTeam").textContent=team.team_name;
-  $("dJersey").textContent=p.jersey_number||"—";
-  $("dReg").textContent=p.registration_complete?t("complete"):t("incomplete");
-  $("dMeals").textContent=p.meals_complete?t("completed"):t("missing");
-  $("captainBtn").textContent=p.captain?t("removeCaptain"):t("setCaptain");
-  $("viceBtn").textContent=p.vice_captain?t("removeVice"):t("setVice");
-  $("coachBtn").textContent=p.is_team_coach?t("removeCoach"):t("setCoach");
-  $("playerDialog").showModal();
-}
-
-async function role(field){
-  await api("/api/manager-membership",{method:"PATCH",body:JSON.stringify({membership_id:selected.p.membership_id,field,value:!selected.p[field]})});
-  $("playerDialog").close();await load();
-}
-async function toggleCoach(){
-  await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:selected.p.is_team_coach?"remove_coach_assignment":"add_coach_assignment",team_id:selected.t.id,participant_id:selected.p.id})});
-  $("playerDialog").close();await load();
-}
-async function remove(){
-  const msg=t("removeConfirm").replace("{name}",`${selected.p.first_name} ${selected.p.last_name}`).replace("{team}",selected.t.team_name);
-  if(!confirm(msg))return;
-  await api("/api/manager-membership",{method:"DELETE",body:JSON.stringify({membership_id:selected.p.membership_id})});
-  $("playerDialog").close();await load();
-}
+function renderLeader(host,p,label){host.innerHTML=p?`<div class="leader-person"><div class="leader-number">#${esc(p.jersey_number||"—")}</div><div><div class="leader-name">${esc(p.first_name)} ${esc(p.last_name)}</div><span class="badge role">${esc(label)}</span></div></div>`:`<div class="leader-empty">${esc(t("notAssigned"))}</div>`}
+function renderCoaches(team){const cs=team.coaches||[];$("coachCountLabel").textContent=cs.length?`(${cs.length})`:"";$("sheetCoaches").innerHTML=cs.length?cs.map(c=>`<span class="coach-chip">${esc(c.first_name)} ${esc(c.last_name)}<button type="button" data-id="${c.id}">×</button></span>`).join(""):`<span class="coach-empty">${esc(t("noCoach"))}</span>`;document.querySelectorAll("#sheetCoaches button").forEach(b=>b.onclick=async()=>{await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:"remove_coach_assignment",team_id:team.id,participant_id:b.dataset.id})});await load()});const s=$("coachCandidateSelect");s.innerHTML=`<option value="">${esc(t("selectCoach"))}</option>`;const used=new Set(cs.map(x=>x.id));(team.coach_candidates||[]).filter(x=>!used.has(x.id)).forEach(p=>s.add(new Option(`${p.last_name} ${p.first_name}${p.jersey_number?` · #${p.jersey_number}`:""}`,p.id)));$("addCoachButton").disabled=s.options.length<=1;$("coachActionMessage").textContent=""}
+async function addCoach(){if(!currentTeam||!$("coachCandidateSelect").value)return;$("coachActionMessage").textContent=t("addingCoach");try{await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:"add_coach_assignment",team_id:currentTeam.id,participant_id:$("coachCandidateSelect").value})});await load()}catch(e){$("coachActionMessage").textContent=e.message}}
+function openPlayer(team,p){selected={team,p};$("dCat").textContent=catLabel(team.category);$("dName").textContent=`${p.first_name} ${p.last_name}`;$("dTeam").textContent=team.team_name;$("dJersey").textContent=p.jersey_number||"—";$("dReg").textContent=p.registration_complete?t("complete"):t("incomplete");$("dMeals").textContent=p.meals_complete?t("completed"):t("missing");$("captainBtn").textContent=p.captain?t("removeCaptain"):t("setCaptain");$("viceBtn").textContent=p.vice_captain?t("removeVice"):t("setVice");$("coachBtn").textContent=p.is_team_coach?t("removeCoach"):t("setCoach");$("playerDialog").showModal()}
+async function role(field){await api("/api/manager-membership",{method:"PATCH",body:JSON.stringify({membership_id:selected.p.membership_id,field,value:!selected.p[field]})});$("playerDialog").close();await load()}
+async function toggleCoach(){await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:selected.p.is_team_coach?"remove_coach_assignment":"add_coach_assignment",team_id:selected.team.id,participant_id:selected.p.id})});$("playerDialog").close();await load()}
+async function removeFromRoster(){if(!confirm(`Remove ${selected.p.first_name} ${selected.p.last_name} from ${selected.team.team_name}?`))return;await api("/api/manager-membership",{method:"DELETE",body:JSON.stringify({membership_id:selected.p.membership_id})});$("playerDialog").close();await load()}
+function typeLabel(x){return x==="coach"?t("coach"):x==="other"?t("other"):t("player")}
+function renderParticipants(){const list=$("participantList");const arr=(currentData.participants||[]).filter(p=>participantFilter==="all"||p.participant_type===participantFilter).sort((a,b)=>`${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`));list.innerHTML=arr.map(p=>`<article class="participant-row"><div class="participant-main"><strong>${esc(p.first_name)} ${esc(p.last_name)}</strong><small>${esc(p.email||"")}</small></div><span class="badge role type-pill">${esc(typeLabel(p.participant_type))}</span><div class="teams-text">${esc((p.teams||[]).map(x=>`${catLabel(x.category)} · ${x.team_name}`).join(" | ")||"—")}</div><button class="edit-link" type="button" data-id="${p.id}">${esc(t("edit"))}</button></article>`).join("");document.querySelectorAll(".edit-link").forEach(b=>b.onclick=()=>openParticipantEdit(b.dataset.id))}
+function openParticipantEdit(id){editingParticipant=currentData.participants.find(x=>x.id===id);if(!editingParticipant)return;$("participantEditName").textContent=`${editingParticipant.first_name} ${editingParticipant.last_name}`;$("peFirst").value=editingParticipant.first_name||"";$("peLast").value=editingParticipant.last_name||"";$("peEmail").value=editingParticipant.email||"";$("peJersey").value=editingParticipant.jersey_number||"";$("jerseyEditField").classList.toggle("hidden",editingParticipant.participant_type!=="player");$("participantTeams").innerHTML=(editingParticipant.teams||[]).length?(editingParticipant.teams||[]).map(x=>`<span class="team-tag">${esc(catLabel(x.category))} · ${esc(x.team_name)}${x.captain?" · C":""}${x.vice_captain?" · VC":""}</span>`).join(""):`<span class="muted">${esc(t("notAssigned"))}</span>`;renderParticipantMeals(editingParticipant);$("participantEditMessage").textContent="";$("participantEditDialog").showModal()}
+function prefOptions(selected,allowBlank=false){const vals=["chicken","beef_pork","fish_seafood","vegetarian"];return `${allowBlank?'<option value="">—</option>':""}${vals.map(v=>`<option value="${v}" ${v===selected?"selected":""}>${esc(t(v))}</option>`).join("")}`}
+function renderParticipantMeals(p){$("participantMeals").innerHTML=currentData.meal_days.map(day=>{const m=(p.meals||[]).find(x=>x.meal_day_id===day.id)||{meal_type:"none"};return `<div class="meal-edit-card" data-day="${day.id}"><h4>${esc(day.name)}</h4><div class="meal-grid"><select class="meal-type"><option value="none" ${m.meal_type==="none"?"selected":""}>${esc(t("noMeal"))}</option><option value="sandwich" ${m.meal_type==="sandwich"?"selected":""}>${esc(t("sandwich"))}</option><option value="hot" ${m.meal_type==="hot"?"selected":""}>${esc(t("hotMeal"))}</option></select><select class="sandwich-choice">${currentData.sandwich_options.map(o=>`<option value="${o.id}" ${o.id===m.sandwich_option_id?"selected":""}>${esc(o.name)}</option>`).join("")}</select><div class="hot-prefs"><select class="hot-p1">${prefOptions(m.hot_preference_1||"chicken")}</select><select class="hot-p2">${prefOptions(m.hot_preference_2||"",true)}</select></div></div></div>`}).join("");document.querySelectorAll(".meal-edit-card").forEach(card=>{const type=card.querySelector(".meal-type"),sand=card.querySelector(".sandwich-choice"),hot=card.querySelector(".hot-prefs");const sync=()=>{sand.style.display=type.value==="sandwich"?"block":"none";hot.style.display=type.value==="hot"?"grid":"none"};type.onchange=sync;sync()})}
+async function saveParticipant(ev){ev.preventDefault();if(!editingParticipant)return;const meals=[...document.querySelectorAll(".meal-edit-card")].map(card=>{const type=card.querySelector(".meal-type").value;return{meal_day_id:card.dataset.day,meal_type:type,sandwich_option_id:type==="sandwich"?card.querySelector(".sandwich-choice").value:null,hot_preference_1:type==="hot"?card.querySelector(".hot-p1").value:null,hot_preference_2:type==="hot"?card.querySelector(".hot-p2").value:null}});$("participantEditMessage").textContent=t("saving");try{await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:"update_participant",participant_id:editingParticipant.id,first_name:$("peFirst").value.trim(),last_name:$("peLast").value.trim(),email:$("peEmail").value.trim(),jersey_number:editingParticipant.participant_type==="player"?($("peJersey").value.trim()||null):null,meals})});$("participantEditMessage").textContent=t("saved");await load();editingParticipant=currentData.participants.find(x=>x.id===editingParticipant.id);renderParticipants();setTimeout(()=>{$("participantEditDialog").close()},350)}catch(e){$("participantEditMessage").textContent=e.message}}
+async function imgData(url){try{const r=await fetch(url);if(!r.ok)throw 0;const b=await r.blob();return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(b)})}catch{return null}}
+async function exportPdf(){if(!currentTeam)return;try{const {jsPDF}=window.jspdf;const doc=new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});const W=210,M=12;doc.setFillColor(17,22,31);doc.rect(0,0,W,42,"F");const [eventLogo,teamLogo]=await Promise.all([imgData("/assets/isdo27-logo.png"),imgData(currentTeam.logo_url||currentTeam.club_logo_url||"/assets/isdo27-logo.png")]);if(eventLogo)doc.addImage(eventLogo,"PNG",M,6,26,26);if(teamLogo)doc.addImage(teamLogo,"PNG",171,6,26,26);doc.setTextColor(239,49,84);doc.setFontSize(8);doc.setFont("helvetica","bold");doc.text("INTERNATIONAL SHARKS DODGEBALL OPEN",43,11);doc.setTextColor(255,255,255);doc.setFontSize(18);doc.text("ISDO 2027",43,19);doc.setFontSize(9);doc.setFont("helvetica","normal");doc.text("26–28 March 2027 · Morges, Switzerland",43,25);doc.setFontSize(13);doc.setFont("helvetica","bold");doc.text(currentTeam.team_name,160,36,{align:"right"});doc.setFontSize(8);doc.text(catLabel(currentTeam.category),160,31,{align:"right"});
+ let y=49;doc.setTextColor(17,24,39);doc.setFillColor(242,244,255);doc.roundedRect(M,y,W-2*M,18,3,3,"F");doc.setFontSize(8);doc.setTextColor(64,86,180);doc.setFont("helvetica","bold");doc.text(t("coaches").toUpperCase(),M+5,y+6);doc.setTextColor(17,24,39);doc.setFontSize(10);doc.text((currentTeam.coaches||[]).map(c=>`${c.first_name} ${c.last_name}`).join(" · ")||"—",M+5,y+13);y+=23;
+ const ps=sortedPlayers(currentTeam.players),cap=ps.find(p=>p.captain),vc=ps.find(p=>p.vice_captain);doc.setDrawColor(226,231,239);doc.roundedRect(M,y,90,18,3,3);doc.roundedRect(108,y,90,18,3,3);doc.setFontSize(7);doc.setTextColor(102,112,133);doc.text(t("captain").toUpperCase(),M+4,y+5);doc.text(t("viceCaptain").toUpperCase(),112,y+5);doc.setFontSize(10);doc.setFont("helvetica","bold");doc.setTextColor(17,24,39);doc.text(cap?`#${cap.jersey_number||"—"}  ${cap.first_name} ${cap.last_name}`:"—",M+4,y+12);doc.text(vc?`#${vc.jersey_number||"—"}  ${vc.first_name} ${vc.last_name}`:"—",112,y+12);y+=24;
+ doc.setFontSize(12);doc.text(t("fullRoster"),M,y);y+=3;
+ const body=ps.map(p=>[p.jersey_number||"—",`${p.first_name} ${p.last_name}`,[p.captain?"C":"",p.vice_captain?"VC":"",p.is_team_coach?t("coach"):""].filter(Boolean).join(" · ")||"—"]);
+ const fontSize=body.length>16?7.5:body.length>12?8.5:9.2;doc.autoTable({startY:y,head:[["#",t("player"),t("role")]],body,margin:{left:M,right:M},theme:"grid",styles:{fontSize,cellPadding:2.4,textColor:[17,24,39],lineColor:[226,231,239],lineWidth:.25},headStyles:{fillColor:[17,22,31],textColor:[255,255,255],fontStyle:"bold"},columnStyles:{0:{cellWidth:18},2:{cellWidth:38}}});
+ const end=doc.lastAutoTable.finalY;doc.setDrawColor(220,224,232);doc.line(M,287,W-M,287);doc.setFontSize(7);doc.setTextColor(102,112,133);doc.text("ISDO 2027 · Official roster sheet",M,291);doc.text(`${ps.length} ${t("players")}`,W-M,291,{align:"right"});
+ doc.save(`ISDO2027_${currentTeam.category}_${currentTeam.team_name}`.replace(/[^a-z0-9_-]+/gi,"_")+".pdf");
+ }catch(e){console.error(e);alert(t("pdfError"))}}
 function esc(v){return String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;")}
