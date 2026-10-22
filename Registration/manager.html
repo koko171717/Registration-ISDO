@@ -1,11 +1,193 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ISDO Manager</title><link rel="stylesheet" href="/css/manager.css"></head><body>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ISDO Manager</title>
+  <link rel="stylesheet" href="/css/manager.css">
+</head>
+<body>
 <main class="wrap">
-<section id="login" class="card auth"><p class="eyebrow">International Sharks Dodgeball Open</p><h1>Manager Portal</h1><p>Sign in with the email assigned to your club.</p>
-<form id="loginForm"><label>Email<input id="email" type="email" required></label><label>Password<input id="password" type="password" required></label><button>Sign in</button></form>
-<p id="loginMsg" class="msg hidden"></p></section>
-<section id="dashboard" class="hidden"><header><div><p class="eyebrow">ISDO Manager Portal</p><h1 id="clubName">My Club</h1><p id="managerEmail"></p></div><button id="logout" class="secondary">Sign out</button></header>
-<div class="stats"><div><span>Teams</span><strong id="teamCount">0</strong></div><div><span>Roster entries</span><strong id="rosterCount">0</strong></div><div><span>Complete</span><strong id="completeCount">0</strong></div><div><span>Meals missing</span><strong id="missingMealsCount">0</strong></div></div>
-<div id="teams"></div></section>
-<dialog id="dialog"><div class="dialog"><button id="closeDialog" class="close">×</button><p class="eyebrow" id="dCat"></p><h2 id="dName"></h2><p id="dTeam"></p><p><b>Jersey:</b> <span id="dJersey"></span></p><p><b>Registration:</b> <span id="dReg"></span></p><p><b>Meals:</b> <span id="dMeals"></span></p><button id="captainBtn">Set as captain</button><button id="viceBtn" class="secondary">Set as vice-captain</button><button id="coachBtn" class="secondary">Set as team coach</button><button id="removeBtn" class="danger">Remove from this roster</button></div></dialog>
+  <section id="login" class="card auth">
+    <div class="auth-top">
+      <div>
+        <p class="eyebrow">International Sharks Dodgeball Open</p>
+        <h1 data-i18n="managerPortal">Manager Portal</h1>
+      </div>
+      <label class="language-mini">
+        <span data-i18n="language">Language</span>
+        <select id="loginLanguage">
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="nl">Nederlands</option>
+          <option value="es">Español</option>
+          <option value="it">Italiano</option>
+          <option value="cs">Čeština</option>
+          <option value="hu">Magyar</option>
+        </select>
+      </label>
+    </div>
+    <p data-i18n="signInHelp">Sign in with the email assigned to your club.</p>
+    <form id="loginForm">
+      <label><span data-i18n="email">Email</span><input id="email" type="email" required></label>
+      <label><span data-i18n="password">Password</span><input id="password" type="password" required></label>
+      <button data-i18n="signIn">Sign in</button>
+    </form>
+    <p id="loginMsg" class="msg hidden"></p>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <header class="portal-header">
+      <div>
+        <p class="eyebrow">ISDO Manager Portal</p>
+        <h1 id="clubName">My Club</h1>
+        <p id="managerEmail" class="muted"></p>
+      </div>
+      <div class="header-actions">
+        <label class="language-mini">
+          <span data-i18n="language">Language</span>
+          <select id="dashboardLanguage">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="de">Deutsch</option>
+            <option value="nl">Nederlands</option>
+            <option value="es">Español</option>
+            <option value="it">Italiano</option>
+            <option value="cs">Čeština</option>
+            <option value="hu">Magyar</option>
+          </select>
+        </label>
+        <button id="logout" class="secondary" data-i18n="signOut">Sign out</button>
+      </div>
+    </header>
+
+    <section class="summary-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow" data-i18n="clubOverview">Club overview</p>
+          <h2 data-i18n="summary">Summary</h2>
+        </div>
+        <p class="section-help" data-i18n="summaryHelp">People are counted once according to their club of origin.</p>
+      </div>
+      <div class="stats">
+        <div><span data-i18n="teams">Teams</span><strong id="teamCount">0</strong></div>
+        <div><span data-i18n="clubPlayers">Club players</span><strong id="clubPlayerCount">0</strong></div>
+        <div><span data-i18n="coaches">Coaches</span><strong id="coachCount">0</strong></div>
+        <div><span data-i18n="accompanying">Accompanying</span><strong id="otherCount">0</strong></div>
+      </div>
+    </section>
+
+    <section class="teams-section">
+      <div class="section-heading teams-title">
+        <div>
+          <p class="eyebrow" data-i18n="competition">Competition</p>
+          <h2 data-i18n="yourRosters">Your rosters</h2>
+        </div>
+        <p class="section-help" data-i18n="rosterHelp">Open a team to view and print its official roster sheet.</p>
+      </div>
+      <div id="teams"></div>
+    </section>
+  </section>
+
+  <dialog id="teamSheetDialog" class="team-sheet-dialog">
+    <article id="teamSheet" class="team-sheet">
+      <div class="sheet-screen-actions no-print">
+        <button id="closeTeamSheet" class="secondary compact" type="button" data-i18n="close">Close</button>
+        <button id="printTeamSheet" class="compact" type="button" data-i18n="printRoster">Print roster</button>
+      </div>
+
+      <header class="sheet-header">
+        <div>
+          <p class="sheet-kicker">International Sharks Dodgeball Open 2027</p>
+          <div class="sheet-category" id="sheetCategory"></div>
+          <h1 id="sheetTeamName"></h1>
+          <p id="sheetClubName" class="muted"></p>
+        </div>
+        <div class="sheet-count">
+          <strong id="sheetPlayerCount">0</strong>
+          <span data-i18n="players">players</span>
+        </div>
+      </header>
+
+      <section class="sheet-band coach-band">
+        <div class="band-title">
+          <span data-i18n="coaches">Coaches</span>
+          <small id="coachCountLabel"></small>
+        </div>
+        <div id="sheetCoaches" class="coach-chip-list"></div>
+        <div class="coach-manager no-print">
+          <select id="coachCandidateSelect">
+            <option value="">Select a player or coach…</option>
+          </select>
+          <button id="addCoachButton" type="button" class="secondary" data-i18n="addCoach">Add coach</button>
+        </div>
+        <p id="coachActionMessage" class="action-message no-print"></p>
+      </section>
+
+      <div class="leadership-grid">
+        <section class="leadership-card">
+          <div class="leadership-label" data-i18n="captain">Captain</div>
+          <div id="captainCard"></div>
+        </section>
+        <section class="leadership-card">
+          <div class="leadership-label" data-i18n="viceCaptain">Vice-captain</div>
+          <div id="viceCaptainCard"></div>
+        </section>
+      </div>
+
+      <section class="full-roster-section">
+        <div class="roster-heading">
+          <h2 data-i18n="fullRoster">Full roster</h2>
+          <span id="sheetRosterMeta"></span>
+        </div>
+        <div class="sheet-table-wrap">
+          <table class="sheet-table">
+            <thead>
+              <tr>
+                <th data-i18n="number">#</th>
+                <th data-i18n="player">Player</th>
+                <th data-i18n="role">Role</th>
+                <th class="no-print" data-i18n="registration">Registration</th>
+                <th class="no-print" data-i18n="meals">Meals</th>
+              </tr>
+            </thead>
+            <tbody id="sheetRosterBody"></tbody>
+          </table>
+        </div>
+        <p class="sheet-hint no-print" data-i18n="playerHint">Click a player to manage captain, vice-captain or team coach roles.</p>
+      </section>
+
+      <footer class="sheet-footer print-only">
+        <span>ISDO 2027 · Morges, Switzerland</span>
+        <span id="printGenerated"></span>
+      </footer>
+    </article>
+  </dialog>
+
+  <dialog id="playerDialog">
+    <div class="dialog">
+      <button id="closeDialog" class="close secondary" type="button">×</button>
+      <p class="eyebrow" id="dCat"></p>
+      <h2 id="dName"></h2>
+      <p id="dTeam" class="muted"></p>
+      <div class="player-info-grid">
+        <div><span data-i18n="jersey">Jersey</span><strong id="dJersey"></strong></div>
+        <div><span data-i18n="registration">Registration</span><strong id="dReg"></strong></div>
+        <div><span data-i18n="meals">Meals</span><strong id="dMeals"></strong></div>
+      </div>
+      <div class="dialog-actions-stack">
+        <button id="captainBtn" type="button"></button>
+        <button id="viceBtn" type="button" class="secondary"></button>
+        <button id="coachBtn" type="button" class="secondary"></button>
+        <button id="removeBtn" type="button" class="danger" data-i18n="removeFromRoster">Remove from this roster</button>
+      </div>
+    </div>
+  </dialog>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/js/supabase.js"></script><script src="/js/manager.js"></script></body></html>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/supabase.js"></script>
+<script src="/js/manager.js"></script>
+</body>
+</html>
