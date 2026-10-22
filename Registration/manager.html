@@ -50,7 +50,19 @@
           </select>
         </label>
         <button id="editParticipantsButton" class="light-btn" type="button" data-i18n="editParticipants">Edit participants</button>
-        <button id="logout" class="outline-light" type="button" data-i18n="signOut">Sign out</button>
+        <div class="account-menu-wrap">
+          <button id="accountMenuButton" class="outline-light account-trigger" type="button">
+            <span data-i18n="account">Account</span> <span class="caret">⌄</span>
+          </button>
+          <div id="accountMenu" class="account-menu hidden">
+            <div class="account-menu-email">
+              <span data-i18n="signedInAs">Signed in as</span>
+              <strong id="accountEmail"></strong>
+            </div>
+            <button id="changePasswordButton" type="button" class="account-menu-item" data-i18n="changePassword">Change password</button>
+            <button id="logout" type="button" class="account-menu-item danger-item" data-i18n="signOut">Sign out</button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -178,6 +190,43 @@
       </section>
       <p id="participantEditMessage" class="action-message"></p>
       <div class="edit-actions"><button type="button" id="cancelParticipantEdit" class="secondary" data-i18n="cancel">Cancel</button><button type="submit" data-i18n="saveChanges">Save changes</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="accountDialog" class="account-dialog">
+    <form id="passwordForm" class="account-card">
+      <div class="account-card-head">
+        <div>
+          <p class="eyebrow" data-i18n="account">Account</p>
+          <h2 data-i18n="changePassword">Change password</h2>
+          <p class="muted" data-i18n="changePasswordHelp">Choose a new password for your manager account.</p>
+        </div>
+        <button id="closeAccountDialog" class="btn-close" type="button">✕ <span data-i18n="close">Close</span></button>
+      </div>
+
+      <div class="account-email-box">
+        <span data-i18n="email">Email</span>
+        <strong id="accountDialogEmail"></strong>
+      </div>
+
+      <div class="password-grid">
+        <label>
+          <span data-i18n="newPassword">New password</span>
+          <input id="newPassword" type="password" minlength="8" autocomplete="new-password" required>
+        </label>
+        <label>
+          <span data-i18n="confirmPassword">Confirm password</span>
+          <input id="confirmPassword" type="password" minlength="8" autocomplete="new-password" required>
+        </label>
+      </div>
+
+      <p class="password-hint" data-i18n="passwordHint">Minimum 8 characters.</p>
+      <p id="passwordMessage" class="action-message"></p>
+
+      <div class="edit-actions">
+        <button type="button" id="cancelPasswordButton" class="secondary" data-i18n="cancel">Cancel</button>
+        <button type="submit" data-i18n="savePassword">Save password</button>
+      </div>
     </form>
   </dialog>
 

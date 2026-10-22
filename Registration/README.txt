@@ -1,17 +1,17 @@
-ISDO Manager V3 — PDF refinement
+ISDO Manager V3.1 — Account update
 
-CUMULATIVE PACK based on V2.1 Pro.
+CUMULATIVE PACK based on Manager V3.
 
-Changes in V3 PDF:
-- Event header and team identity block kept unchanged.
-- Coaches band made more compact.
-- Captain and vice-captain cards reduced significantly.
-- Full roster table redesigned for better readability.
-- Narrower jersey column, wider player-name column.
-- Cleaner alternating rows and lighter separators.
-- C / VC / Coach roles receive subtle visual highlighting.
-- More compact vertical rhythm while preserving one-page A4 export.
-- Safe meal saving fix remains included.
+New:
+- Account / Mon compte menu in Manager header.
+- Manager email shown read-only.
+- Change password dialog.
+- New password + confirmation.
+- Minimum 8 characters.
+- Password update uses Supabase Auth updateUser().
+- Success/error feedback.
+- Sign out moved into Account menu.
+- Translated in all 8 Manager languages.
 
-No new SQL if player-meals-check-v2.sql was already executed.
-No new Vercel function.
+No SQL required.
+No new Vercel serverless function.
