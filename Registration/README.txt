@@ -1,28 +1,17 @@
-ISDO 2027 — Manager Portal V2.1 Pro
+ISDO Manager V3 — PDF refinement
 
-CUMULATIVE PACK.
+CUMULATIVE PACK based on V2.1 Pro.
 
-Replace:
-- Registration/manager.html
-- Registration/css/manager.css
-- Registration/js/manager.js
-- Registration/api/manager-roster.js
-- Registration/assets/isdo27-logo.png
+Changes in V3 PDF:
+- Event header and team identity block kept unchanged.
+- Coaches band made more compact.
+- Captain and vice-captain cards reduced significantly.
+- Full roster table redesigned for better readability.
+- Narrower jersey column, wider player-name column.
+- Cleaner alternating rows and lighter separators.
+- C / VC / Coach roles receive subtle visual highlighting.
+- More compact vertical rhythm while preserving one-page A4 export.
+- Safe meal saving fix remains included.
 
-Database:
-- If not already done, run once:
-  sql/player-meals-check-v2.sql
-
-Changes included:
-- Premium Manager Portal redesign.
-- Edit participants (players, coaches, accompanying).
-- Safe participant meal saving (no delete-all before insert).
-- Professional official roster sheet.
-- Team logo / club logo fallback.
-- Direct PDF export with jsPDF.
-- PDF redesigned as a polished one-page A4 official team roster:
-  event header, ISDO logo, team logo, category, team name,
-  coaches, captain, vice-captain, player count, alternating roster rows,
-  compact footer.
-
-No new Vercel serverless function.
+No new SQL if player-meals-check-v2.sql was already executed.
+No new Vercel function.

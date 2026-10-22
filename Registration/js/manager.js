@@ -76,7 +76,7 @@ async function exportPdf(){
    imgData(currentTeam.logo_url||currentTeam.club_logo_url||"/assets/isdo27-logo.png")
   ]);
 
-  // ===== TOP EVENT HEADER =====
+  // ===== EVENT HEADER — unchanged =====
   doc.setFillColor(15,20,29);
   doc.rect(0,0,W,48,"F");
   doc.setFillColor(239,49,84);
@@ -107,7 +107,7 @@ async function exportPdf(){
   doc.setTextColor(255,255,255);
   doc.text("OFFICIAL TEAM ROSTER",46,35);
 
-  // ===== TEAM IDENTITY CARD =====
+  // ===== TEAM IDENTITY — unchanged =====
   let y=55;
   doc.setFillColor(248,249,252);
   doc.setDrawColor(226,231,239);
@@ -127,8 +127,7 @@ async function exportPdf(){
 
   doc.setFontSize(17);
   doc.setTextColor(17,24,39);
-  const teamNameLines=doc.splitTextToSize(currentTeam.team_name,100);
-  doc.text(teamNameLines,teamTextX,y+17);
+  doc.text(doc.splitTextToSize(currentTeam.team_name,100),teamTextX,y+17);
 
   doc.setFont("helvetica","normal");
   doc.setFontSize(8.5);
@@ -137,7 +136,6 @@ async function exportPdf(){
    doc.text(currentTeam.managing_club_name,teamTextX,y+25);
   }
 
-  // player count chip
   doc.setFillColor(238,242,255);
   doc.roundedRect(164,y+7,29,17,3,3,"F");
   doc.setFont("helvetica","bold");
@@ -148,103 +146,119 @@ async function exportPdf(){
   doc.setTextColor(102,112,133);
   doc.text(t("players").toUpperCase(),178.5,y+20,{align:"center"});
 
-  y+=37;
+  y+=36;
 
-  // ===== COACHES BAND =====
-  doc.setFillColor(243,245,255);
+  // ===== COACHES — more compact =====
+  doc.setFillColor(244,246,255);
   doc.setDrawColor(226,231,239);
-  doc.roundedRect(M,y,CONTENT,16,3,3,"FD");
+  doc.roundedRect(M,y,CONTENT,13,2.5,2.5,"FD");
   doc.setFont("helvetica","bold");
-  doc.setFontSize(7);
+  doc.setFontSize(6.5);
   doc.setTextColor(64,86,180);
-  doc.text(t("coaches").toUpperCase(),M+4,y+5.5);
+  doc.text(t("coaches").toUpperCase(),M+4,y+4.5);
 
   doc.setFont("helvetica","normal");
-  doc.setFontSize(9.5);
+  doc.setFontSize(8.8);
   doc.setTextColor(17,24,39);
   const coachText=coaches.length?coaches.join("  ·  "):"—";
-  const coachLines=doc.splitTextToSize(coachText,CONTENT-8);
-  doc.text(coachLines.slice(0,2),M+4,y+11.5);
-  y+=21;
+  doc.text(doc.splitTextToSize(coachText,CONTENT-8)[0],M+4,y+9.7);
+  y+=17;
 
-  // ===== CAPTAIN / VICE-CAPTAIN =====
-  const boxGap=4,boxW=(CONTENT-boxGap)/2,boxH=19;
+  // ===== CAPTAIN / VICE-CAPTAIN — compact line cards =====
+  const gap=4,boxW=(CONTENT-gap)/2,boxH=13;
   const drawLeader=(x,label,p,accent)=>{
-   doc.setDrawColor(226,231,239);
    doc.setFillColor(255,255,255);
-   doc.roundedRect(x,y,boxW,boxH,3,3,"FD");
+   doc.setDrawColor(226,231,239);
+   doc.roundedRect(x,y,boxW,boxH,2.5,2.5,"FD");
    doc.setFillColor(...accent);
-   doc.roundedRect(x,y,2.3,boxH,1,1,"F");
+   doc.roundedRect(x,y,2,boxH,1,1,"F");
+
    doc.setFont("helvetica","bold");
-   doc.setFontSize(6.8);
+   doc.setFontSize(6.2);
    doc.setTextColor(102,112,133);
-   doc.text(label.toUpperCase(),x+6,y+5.5);
-   doc.setFontSize(10.5);
+   doc.text(label.toUpperCase(),x+5.5,y+4.4);
+
+   doc.setFontSize(9.2);
    doc.setTextColor(17,24,39);
    const who=p?`#${p.jersey_number||"—"}  ${p.first_name} ${p.last_name}`:"—";
-   doc.text(doc.splitTextToSize(who,boxW-12)[0],x+6,y+13);
+   doc.text(doc.splitTextToSize(who,boxW-9)[0],x+5.5,y+9.7);
   };
   drawLeader(M,t("captain"),cap,[112,87,216]);
-  drawLeader(M+boxW+boxGap,t("viceCaptain"),vc,[64,86,180]);
-  y+=25;
+  drawLeader(M+boxW+gap,t("viceCaptain"),vc,[64,86,180]);
+  y+=18;
 
-  // ===== ROSTER TITLE =====
+  // ===== ROSTER TITLE — lighter =====
   doc.setFont("helvetica","bold");
-  doc.setFontSize(12);
+  doc.setFontSize(10.8);
   doc.setTextColor(17,24,39);
   doc.text(t("fullRoster"),M,y);
 
   doc.setFont("helvetica","normal");
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setTextColor(102,112,133);
   doc.text(`${ps.length} ${t("players")}`,W-M,y,{align:"right"});
-  y+=4;
+  y+=3.5;
 
-  // ===== TABLE =====
-  const body=ps.map(p=>[
-   p.jersey_number||"—",
-   `${p.first_name} ${p.last_name}`,
-   [
-    p.captain?"C":"",
-    p.vice_captain?"VC":"",
-    p.is_team_coach?t("coach"):""
-   ].filter(Boolean).join("  ·  ")||"—"
-  ]);
+  // ===== ROSTER — more readable + polished roles =====
+  const body=ps.map(p=>{
+   let role="";
+   if(p.captain) role="C";
+   if(p.vice_captain) role=role?`${role}  ·  VC`:"VC";
+   if(p.is_team_coach) role=role?`${role}  ·  ${t("coach")}`:t("coach");
+   return [p.jersey_number||"—",`${p.first_name} ${p.last_name}`,role||""];
+  });
 
   const rowCount=body.length;
-  const fontSize=rowCount>20?7.0:rowCount>17?7.6:rowCount>14?8.2:8.8;
-  const pad=rowCount>20?1.55:rowCount>17?1.8:2.15;
+  const fontSize=rowCount>20?7.1:rowCount>17?7.6:rowCount>14?8.0:8.45;
+  const pad=rowCount>20?1.35:rowCount>17?1.55:1.8;
 
   doc.autoTable({
    startY:y,
    head:[["#",t("player"),t("role")]],
    body,
-   margin:{left:M,right:M,bottom:16},
+   margin:{left:M,right:M,bottom:15},
    theme:"plain",
    styles:{
     font:"helvetica",
     fontSize,
-    cellPadding:pad,
+    cellPadding:{top:pad,bottom:pad,left:2.5,right:2.5},
     textColor:[17,24,39],
-    lineColor:[229,233,240],
-    lineWidth:{bottom:.22},
+    lineColor:[231,234,240],
+    lineWidth:{bottom:.18},
     valign:"middle"
    },
    headStyles:{
-    fillColor:[15,20,29],
+    fillColor:[23,28,38],
     textColor:[255,255,255],
     fontStyle:"bold",
-    fontSize:7.5,
-    cellPadding:2.4
+    fontSize:7.1,
+    cellPadding:{top:2.2,bottom:2.2,left:2.5,right:2.5}
    },
-   alternateRowStyles:{fillColor:[249,250,252]},
+   alternateRowStyles:{fillColor:[248,249,251]},
    columnStyles:{
-    0:{cellWidth:18,fontStyle:"bold",halign:"center"},
-    1:{cellWidth:105,fontStyle:"bold"},
-    2:{cellWidth:CONTENT-18-105}
+    0:{cellWidth:15,fontStyle:"bold",halign:"center",textColor:[38,45,59]},
+    1:{cellWidth:116,fontStyle:"bold"},
+    2:{cellWidth:CONTENT-15-116,halign:"left",fontStyle:"bold",textColor:[64,86,180]}
    },
-   didDrawPage:()=>{
-    // Intentionally empty: design is forced to a single A4 page by compact row sizing.
+   didParseCell:(data)=>{
+    if(data.section==="body"&&data.column.index===2){
+     const val=String(data.cell.raw||"");
+     if(val==="C"){
+      data.cell.styles.fillColor=[255,238,243];
+      data.cell.styles.textColor=[201,31,67];
+      data.cell.styles.halign="center";
+     }else if(val==="VC"){
+      data.cell.styles.fillColor=[240,237,255];
+      data.cell.styles.textColor=[112,87,216];
+      data.cell.styles.halign="center";
+     }else if(val.includes(t("coach"))){
+      data.cell.styles.fillColor=[238,242,255];
+      data.cell.styles.textColor=[64,86,180];
+      data.cell.styles.halign="center";
+     }else if(!val){
+      data.cell.text=[""];
+     }
+    }
    }
   });
 
@@ -260,6 +274,7 @@ async function exportPdf(){
   const filename=`ISDO2027_${currentTeam.category}_${currentTeam.team_name}`
    .replace(/[^a-z0-9_-]+/gi,"_")+".pdf";
   doc.save(filename);
+
  }catch(e){
   console.error(e);
   alert(t("pdfError"));
