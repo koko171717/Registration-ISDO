@@ -27,3 +27,12 @@ LEGAL LANGUAGE NOTE
 - The official legal document title/content currently comes from Supabase legal_documents.
 - The form now displays a translated disclaimer stating that English remains the official reference.
 - Actual translated legal document bodies require the exact legal source text/approved translations; they are not fabricated in this pack.
+
+
+FINAL CATERING UI UPDATE
+- Catering presentation redesigned into separate Sandwich / Hot Meal boxes.
+- Body copy no longer uses excessive bold.
+- The Meal examples are displayed on separate category rows.
+- Examples are restricted to dishes actually provided by The Meal.
+- Responsive layout stacks on mobile.
+- No additional SQL required if the previous meal-preferences migration has already been run.
