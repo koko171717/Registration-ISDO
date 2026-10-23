@@ -13,6 +13,20 @@ cs:{managerPortal:"Portál manažera",language:"Jazyk",signInHelp:"Přihlaste se
 hu:{managerPortal:"Manager Portál",language:"Nyelv",signInHelp:"Jelentkezz be a klubodhoz rendelt e-mail-címmel.",email:"E-mail",password:"Jelszó",signIn:"Bejelentkezés",signOut:"Kijelentkezés",editParticipants:"Résztvevők szerkesztése",clubOverview:"Klub áttekintése",summary:"Összegzés",summaryHelp:"Minden személy csak egyszer számít, a származási klubja alapján.",teams:"Csapatok",clubPlayers:"Klub játékosai",coaches:"Edzők",accompanying:"Kísérők",competition:"Verseny",yourRosters:"Csapatlistáid",rosterHelp:"Nyiss meg egy csapatot a hivatalos roster megtekintéséhez.",rosterSheet:"Hivatalos roster",close:"Bezárás",exportPdf:"PDF exportálás",addCoach:"Edző hozzáadása",captain:"Csapatkapitány",viceCaptain:"Helyettes kapitány",teamSheet:"Csapatlap",fullRoster:"Teljes roster",players:"játékos",player:"Játékos",role:"Szerep",registration:"Regisztráció",meals:"Étkezések",playerHint:"Kattints egy játékosra a kapitány, helyettes kapitány vagy edző kezeléséhez.",clubManagement:"Klubkezelés",participantsHelp:"A klubhoz tartozó játékosok, edzők és kísérők.",all:"Mind",playersTitle:"Játékosok",editParticipant:"Résztvevő szerkesztése",firstName:"Keresztnév",lastName:"Vezetéknév",jersey:"Mezszám",teamsAndRoles:"Csapatok és szerepek",cancel:"Mégse",saveChanges:"Mentés",removeFromRoster:"Eltávolítás a rosterből",selectCoach:"Válassz játékost vagy edzőt…",noCoach:"Nincs kijelölt edző",notAssigned:"Nincs kijelölve",complete:"Teljes",incomplete:"Hiányos",completed:"Teljes",missing:"Hiányzik",setCaptain:"Kapitánynak kijelölés",removeCaptain:"Kapitány eltávolítása",setVice:"Helyettes kapitánynak kijelölés",removeVice:"Helyettes kapitány eltávolítása",setCoach:"Edzőnek kijelölés",removeCoach:"Edző eltávolítása",addingCoach:"Edző hozzáadása…",team:"csapat",teamsLabel:"csapatok",catMen:"Férfi",catWomen:"Női",catMixed:"Vegyes",coach:"Edző",other:"Kísérő",edit:"Szerkesztés",noMeal:"Nincs étkezés",sandwich:"Szendvics",hotMeal:"Meleg étel",priority1:"1. prioritás",priority2:"2. prioritás",vegetarian:"Vegetáriánus",chicken:"Csirke",beef_pork:"Marha / Sertés",fish_seafood:"Hal / Tenger gyümölcsei",saving:"Mentés…",saved:"Módosítások mentve.",pdfError:"A PDF létrehozása sikertelen.",participantType:"Típus",account:"Fiók",signedInAs:"Bejelentkezve mint",changePassword:"Jelszó módosítása",changePasswordHelp:"Válassz új jelszót a manager fiókodhoz.",newPassword:"Új jelszó",confirmPassword:"Jelszó megerősítése",passwordHint:"Minimum 8 karakter.",savePassword:"Jelszó mentése",passwordMismatch:"A jelszavak nem egyeznek.",passwordTooShort:"A jelszónak legalább 8 karakteresnek kell lennie.",passwordSaved:"Jelszó sikeresen frissítve.",passwordUpdateError:"A jelszó frissítése sikertelen."}
 };
 function t(k){return T[lang]?.[k]||T.en[k]||k}
+
+const MANAGER_HOT_LABELS={
+ en:{chicken:"Chicken",pork:"Pork",fish:"Fish",vegetarian:"Vegetarian",category:"Hot meal category",select:"Select a category"},
+ fr:{chicken:"Poulet",pork:"Porc",fish:"Poisson",vegetarian:"Végétarien",category:"Catégorie du repas chaud",select:"Sélectionnez une catégorie"},
+ de:{chicken:"Hähnchen",pork:"Schwein",fish:"Fisch",vegetarian:"Vegetarisch",category:"Kategorie der warmen Mahlzeit",select:"Kategorie wählen"},
+ nl:{chicken:"Kip",pork:"Varken",fish:"Vis",vegetarian:"Vegetarisch",category:"Categorie warme maaltijd",select:"Selecteer een categorie"},
+ es:{chicken:"Pollo",pork:"Cerdo",fish:"Pescado",vegetarian:"Vegetariano",category:"Categoría de comida caliente",select:"Selecciona una categoría"},
+ it:{chicken:"Pollo",pork:"Maiale",fish:"Pesce",vegetarian:"Vegetariano",category:"Categoria del pasto caldo",select:"Seleziona una categoria"},
+ cs:{chicken:"Kuře",pork:"Vepřové",fish:"Ryby",vegetarian:"Vegetariánské",category:"Kategorie teplého jídla",select:"Vyberte kategorii"},
+ hu:{chicken:"Csirke",pork:"Sertés",fish:"Hal",vegetarian:"Vegetáriánus",category:"Meleg étel kategóriája",select:"Válassz kategóriát"}
+};
+function managerHotLabel(v){return(MANAGER_HOT_LABELS[lang]||MANAGER_HOT_LABELS.en)[v]||v}
+function normalizeHotCategory(v){return v==="beef_pork"?"pork":v==="fish_seafood"?"fish":v}
+
 function catLabel(c){return c==="Men"?t("catMen"):c==="Women"?t("catWomen"):c==="Mixed"?t("catMixed"):c}
 function setLang(v){lang=T[v]?v:"en";localStorage.setItem("isdo_manager_lang",lang);document.documentElement.lang=lang;["loginLanguage","dashboardLanguage"].forEach(id=>{if($(id))$(id).value=lang});document.querySelectorAll("[data-i18n]").forEach(el=>el.textContent=t(el.dataset.i18n));if(currentData)renderAll()}
 
@@ -109,9 +123,59 @@ async function removeFromRoster(){if(!confirm(`Remove ${selected.p.first_name} $
 function typeLabel(x){return x==="coach"?t("coach"):x==="other"?t("other"):t("player")}
 function renderParticipants(){const list=$("participantList");const arr=(currentData.participants||[]).filter(p=>participantFilter==="all"||p.participant_type===participantFilter).sort((a,b)=>`${a.last_name} ${a.first_name}`.localeCompare(`${b.last_name} ${b.first_name}`));list.innerHTML=arr.map(p=>`<article class="participant-row"><div class="participant-main"><strong>${esc(p.first_name)} ${esc(p.last_name)}</strong><small>${esc(p.email||"")}</small></div><span class="badge role type-pill">${esc(typeLabel(p.participant_type))}</span><div class="teams-text">${esc((p.teams||[]).map(x=>`${catLabel(x.category)} · ${x.team_name}`).join(" | ")||"—")}</div><button class="edit-link" type="button" data-id="${p.id}">${esc(t("edit"))}</button></article>`).join("");document.querySelectorAll(".edit-link").forEach(b=>b.onclick=()=>openParticipantEdit(b.dataset.id))}
 function openParticipantEdit(id){editingParticipant=currentData.participants.find(x=>x.id===id);if(!editingParticipant)return;$("participantEditName").textContent=`${editingParticipant.first_name} ${editingParticipant.last_name}`;$("peFirst").value=editingParticipant.first_name||"";$("peLast").value=editingParticipant.last_name||"";$("peEmail").value=editingParticipant.email||"";$("peJersey").value=editingParticipant.jersey_number||"";$("jerseyEditField").classList.toggle("hidden",editingParticipant.participant_type!=="player");$("participantTeams").innerHTML=(editingParticipant.teams||[]).length?(editingParticipant.teams||[]).map(x=>`<span class="team-tag">${esc(catLabel(x.category))} · ${esc(x.team_name)}${x.captain?" · C":""}${x.vice_captain?" · VC":""}</span>`).join(""):`<span class="muted">${esc(t("notAssigned"))}</span>`;renderParticipantMeals(editingParticipant);$("participantEditMessage").textContent="";$("participantEditDialog").showModal()}
-function prefOptions(selected,allowBlank=false){const vals=["chicken","beef_pork","fish_seafood","vegetarian"];return `${allowBlank?'<option value="">—</option>':""}${vals.map(v=>`<option value="${v}" ${v===selected?"selected":""}>${esc(t(v))}</option>`).join("")}`}
-function renderParticipantMeals(p){$("participantMeals").innerHTML=currentData.meal_days.map(day=>{const m=(p.meals||[]).find(x=>x.meal_day_id===day.id)||{meal_type:"none"};return `<div class="meal-edit-card" data-day="${day.id}"><h4>${esc(day.name)}</h4><div class="meal-grid"><select class="meal-type"><option value="none" ${m.meal_type==="none"?"selected":""}>${esc(t("noMeal"))}</option><option value="sandwich" ${m.meal_type==="sandwich"?"selected":""}>${esc(t("sandwich"))}</option><option value="hot" ${m.meal_type==="hot"?"selected":""}>${esc(t("hotMeal"))}</option></select><select class="sandwich-choice">${currentData.sandwich_options.map(o=>`<option value="${o.id}" ${o.id===m.sandwich_option_id?"selected":""}>${esc(o.name)}</option>`).join("")}</select><div class="hot-prefs"><select class="hot-p1">${prefOptions(m.hot_preference_1||"chicken")}</select><select class="hot-p2">${prefOptions(m.hot_preference_2||"",true)}</select></div></div></div>`}).join("");document.querySelectorAll(".meal-edit-card").forEach(card=>{const type=card.querySelector(".meal-type"),sand=card.querySelector(".sandwich-choice"),hot=card.querySelector(".hot-prefs");const sync=()=>{sand.style.display=type.value==="sandwich"?"block":"none";hot.style.display=type.value==="hot"?"grid":"none"};type.onchange=sync;sync()})}
-async function saveParticipant(ev){ev.preventDefault();if(!editingParticipant)return;const meals=[...document.querySelectorAll(".meal-edit-card")].map(card=>{const type=card.querySelector(".meal-type").value;return{meal_day_id:card.dataset.day,meal_type:type,sandwich_option_id:type==="sandwich"?card.querySelector(".sandwich-choice").value:null,hot_preference_1:type==="hot"?card.querySelector(".hot-p1").value:null,hot_preference_2:type==="hot"?card.querySelector(".hot-p2").value:null}});$("participantEditMessage").textContent=t("saving");try{await api("/api/manager-roster",{method:"POST",body:JSON.stringify({action:"update_participant",participant_id:editingParticipant.id,first_name:$("peFirst").value.trim(),last_name:$("peLast").value.trim(),email:$("peEmail").value.trim(),jersey_number:editingParticipant.participant_type==="player"?($("peJersey").value.trim()||null):null,meals})});$("participantEditMessage").textContent=t("saved");await load();editingParticipant=currentData.participants.find(x=>x.id===editingParticipant.id);renderParticipants();setTimeout(()=>{$("participantEditDialog").close()},350)}catch(e){$("participantEditMessage").textContent=e.message}}
+function prefOptions(selected=''){
+ const labels=MANAGER_HOT_LABELS[lang]||MANAGER_HOT_LABELS.en;
+ return `<option value="">${esc(labels.select)}</option>`+
+  ["chicken","pork","fish","vegetarian"].map(v=>`<option value="${v}" ${v===normalizeHotCategory(selected)?"selected":""}>${esc(labels[v])}</option>`).join("")
+}
+
+function renderParticipantMeals(p){
+ $("participantMeals").innerHTML=currentData.meal_days.map(day=>{
+  const m=(p.meals||[]).find(x=>x.meal_day_id===day.id)||{meal_type:"none"};
+  return `<div class="meal-edit-card" data-day="${day.id}"><h4>${esc(day.name)}</h4><div class="meal-grid">
+   <select class="meal-type">
+    <option value="none" ${m.meal_type==="none"?"selected":""}>${esc(t("noMeal"))}</option>
+    <option value="sandwich" ${m.meal_type==="sandwich"?"selected":""}>${esc(t("sandwich"))}</option>
+    <option value="hot" ${m.meal_type==="hot"?"selected":""}>${esc(t("hotMeal"))}</option>
+   </select>
+   <select class="sandwich-choice">${currentData.sandwich_options.map(o=>`<option value="${o.id}" ${o.id===m.sandwich_option_id?"selected":""}>${esc(o.name)}</option>`).join("")}</select>
+   <div class="hot-prefs"><label>${esc((MANAGER_HOT_LABELS[lang]||MANAGER_HOT_LABELS.en).category)}<select class="hot-category">${prefOptions(m.hot_preference_1||"")}</select></label></div>
+  </div></div>`
+ }).join("");
+ document.querySelectorAll(".meal-edit-card").forEach(card=>{
+  const type=card.querySelector(".meal-type"),sand=card.querySelector(".sandwich-choice"),hot=card.querySelector(".hot-prefs");
+  const sync=()=>{sand.style.display=type.value==="sandwich"?"block":"none";hot.style.display=type.value==="hot"?"block":"none"};
+  type.onchange=sync;sync()
+ })
+}
+
+async function saveParticipant(ev){
+ ev.preventDefault();if(!editingParticipant)return;
+ const meals=[...document.querySelectorAll(".meal-edit-card")].map(card=>{
+  const type=card.querySelector(".meal-type").value;
+  return{
+   meal_day_id:card.dataset.day,
+   meal_type:type,
+   sandwich_option_id:type==="sandwich"?card.querySelector(".sandwich-choice").value:null,
+   hot_preference_1:type==="hot"?card.querySelector(".hot-category").value:null,
+   hot_preference_2:null
+  }
+ });
+ $("participantEditMessage").textContent=t("saving");
+ try{
+  await api("/api/manager-roster",{method:"POST",body:JSON.stringify({
+   action:"update_participant",participant_id:editingParticipant.id,
+   first_name:$("peFirst").value.trim(),last_name:$("peLast").value.trim(),
+   email:$("peEmail").value.trim(),
+   jersey_number:editingParticipant.participant_type==="player"?($("peJersey").value.trim()||null):null,
+   meals
+  })});
+  $("participantEditMessage").textContent=t("saved");
+  await load();editingParticipant=currentData.participants.find(x=>x.id===editingParticipant.id);renderParticipants();
+  setTimeout(()=>{$("participantEditDialog").close()},350)
+ }catch(e){$("participantEditMessage").textContent=e.message}
+}
+
 async function imgData(url){try{const r=await fetch(url);if(!r.ok)throw 0;const b=await r.blob();return await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(fr.result);fr.readAsDataURL(b)})}catch{return null}}
 async function exportPdf(){
  if(!currentTeam)return;

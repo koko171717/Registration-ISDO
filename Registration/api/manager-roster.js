@@ -13,9 +13,20 @@ async function managerScope(u){
  if(!ids.length)throw E(403,"No club assigned.");return{admin,ids}
 }
 function validateMeals(meals,days,sands){
- const vd=new Set(days.map(x=>x.id)),vs=new Set(sands.map(x=>x.id)),prefs=new Set(["chicken","beef_pork","fish_seafood","vegetarian"]),out=[];
+ const vd=new Set(days.map(x=>x.id)),vs=new Set(sands.map(x=>x.id)),cats=new Set(["chicken","pork","fish","vegetarian"]),out=[];
  if(!Array.isArray(meals)||meals.length!==days.length)throw E(400,"Please choose a meal option for every day.");
- for(const m of meals){if(!vd.has(m.meal_day_id))throw E(400,"Invalid meal day.");const type=m.meal_type||"none";if(type==="none")out.push({meal_day_id:m.meal_day_id,meal_type:"none",sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:null,hot_preference_2:null,ordered:false});else if(type==="sandwich"){if(!vs.has(m.sandwich_option_id))throw E(400,"Invalid sandwich.");out.push({meal_day_id:m.meal_day_id,meal_type:"sandwich",sandwich_option_id:m.sandwich_option_id,hot_meal_option_id:null,hot_preference_1:null,hot_preference_2:null,ordered:true})}else if(type==="hot"){const p1=m.hot_preference_1,p2=m.hot_preference_2;if(!prefs.has(p1))throw E(400,"Invalid hot meal preference.");if(p1==="vegetarian"){out.push({meal_day_id:m.meal_day_id,meal_type:"hot",sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:p1,hot_preference_2:null,ordered:true})}else{if(!prefs.has(p2)||p1===p2)throw E(400,"Please choose two different hot meal preferences.");out.push({meal_day_id:m.meal_day_id,meal_type:"hot",sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:p1,hot_preference_2:p2,ordered:true})}}else throw E(400,"Invalid meal type.")}
+ for(const m of meals){
+  if(!vd.has(m.meal_day_id))throw E(400,"Invalid meal day.");
+  const type=m.meal_type||"none";
+  if(type==="none")out.push({meal_day_id:m.meal_day_id,meal_type:"none",sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:null,hot_preference_2:null,ordered:false});
+  else if(type==="sandwich"){
+   if(!vs.has(m.sandwich_option_id))throw E(400,"Invalid sandwich.");
+   out.push({meal_day_id:m.meal_day_id,meal_type:"sandwich",sandwich_option_id:m.sandwich_option_id,hot_meal_option_id:null,hot_preference_1:null,hot_preference_2:null,ordered:true})
+  }else if(type==="hot"){
+   if(!cats.has(m.hot_preference_1)||m.hot_preference_2)throw E(400,"Please choose one valid hot-meal category.");
+   out.push({meal_day_id:m.meal_day_id,meal_type:"hot",sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:m.hot_preference_1,hot_preference_2:null,ordered:true})
+  }else throw E(400,"Invalid meal type.")
+ }
  return out
 }
 export default async function handler(req,res){

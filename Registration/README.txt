@@ -1,17 +1,33 @@
-ISDO Manager V3.1 — Account update
+ISDO 2027 — FINAL HOT MEAL UPDATE
 
-CUMULATIVE PACK based on Manager V3.
+Final categories:
+- Chicken / Poulet
+- Pork / Porc
+- Fish / Poisson
+- Vegetarian / Végétarien
 
-New:
-- Account / Mon compte menu in Manager header.
-- Manager email shown read-only.
-- Change password dialog.
-- New password + confirmation.
-- Minimum 8 characters.
-- Password update uses Supabase Auth updateUser().
-- Success/error feedback.
-- Sign out moved into Account menu.
-- Translated in all 8 Manager languages.
+Priority 1 / Priority 2 has been removed everywhere.
 
-No SQL required.
-No new Vercel serverless function.
+The Meal information now clearly states before the examples:
+- at least one dish is guaranteed in each category;
+- dishes are prepared according to seasonal products;
+- examples are non-contractual;
+- exact dishes may vary;
+- the selected category remains guaranteed.
+
+Database compatibility:
+- hot_preference_1 now stores the selected hot-meal category;
+- hot_preference_2 is always null;
+- old beef_pork values migrate to pork;
+- old fish_seafood values migrate to fish.
+
+INSTALLATION
+1. Run ONCE in Supabase:
+   sql/meal-categories-final.sql
+
+2. Replace the files from this pack in your Registration folder.
+
+This cumulative pack also includes the latest Manager V3.1 Account/dropdown fix,
+PDF V3, participant editor and safe meal saving.
+
+No new Vercel function.

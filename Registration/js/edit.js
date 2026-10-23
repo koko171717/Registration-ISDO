@@ -1,5 +1,5 @@
 const db=window.isdoSupabase;const $=id=>document.getElementById(id);
-const HOT_PRIMARY=[['chicken','Chicken'],['beef_pork','Beef & Pork'],['fish_seafood','Fish & Seafood']];const HOT_ALT=[...HOT_PRIMARY,['vegetarian','Vegetarian']];const state={token:'',clubs:[],categories:[],teams:[],access:[],mealDays:[],sandwichOptions:[],registration:null};
+const HOT_CATEGORIES=[['chicken','Chicken'],['pork','Pork'],['fish','Fish'],['vegetarian','Vegetarian']];const state={token:'',clubs:[],categories:[],teams:[],access:[],mealDays:[],sandwichOptions:[],registration:null};
 const e={loading:$('editLoading'),fatal:$('editFatal'),fatalMessage:$('editFatalMessage'),form:$('editForm'),success:$('editSuccess'),type:$('participantType'),first:$('firstName'),last:$('lastName'),birth:$('birthDate'),nationality:$('nationality'),email:$('email'),jersey:$('jerseyNumber'),jerseyField:$('jerseyField'),origin:$('originClub'),originField:$('originClubField'),clubTeamsTitle:$('clubTeamsTitle'),clubTeamsDescription:$('clubTeamsDescription'),originClubLabel:$('originClubLabel'),playerTeamsBlock:$('playerTeamsBlock'),refereeTeamBlock:$('refereeTeamBlock'),cat1:$('category1'),team1:$('team1'),toggle2:$('secondCategoryToggle'),block2:$('team2Block'),cat2:$('category2'),team2:$('team2'),meals:$('mealChoices'),mealTotal:$('mealTotal'),confirmation:$('confirmation'),save:$('saveButton'),error:$('editError'),again:$('editAgainButton')};
 document.addEventListener('DOMContentLoaded',init);
 async function init(){state.token=new URLSearchParams(location.search).get('token')||'';if(!state.token)return fatal('This edit link is incomplete.');try{await Promise.all([loadReferenceData(),loadRegistration().then(x=>state.registration=x)]);renderClubs();renderMeals();bind();populateRegistration();e.loading.classList.add('hidden');e.form.classList.remove('hidden')}catch(err){console.error(err);fatal(err.message||'This registration could not be loaded.')}}
@@ -9,7 +9,7 @@ function bind(){e.type.onchange=applyParticipantType;e.origin.onchange=()=>{rese
 function isPlayer(){return e.type.value==='player'}
 function isReferee(){return e.type.value==='referee'}
 function applyParticipantType(){const player=isPlayer(),referee=isReferee();e.jerseyField.classList.toggle('hidden',!player);e.playerTeamsBlock.classList.toggle('hidden',!player);e.refereeTeamBlock.classList.toggle('hidden',!referee);e.originField.classList.toggle('hidden',referee);e.origin.required=!referee;if(player){e.clubTeamsTitle.textContent='2. Club & teams';e.clubTeamsDescription.textContent='Select your club of origin and the category or categories in which you will play.';e.originClubLabel.textContent='Club of origin *'}else if(referee){e.clubTeamsTitle.textContent='2. Team';e.clubTeamsDescription.textContent='You are registered with the ISDO referee team.';e.origin.value=''}else{e.clubTeamsTitle.textContent='2. Club';e.clubTeamsDescription.textContent='Which club are you coming with?';e.originClubLabel.textContent='Club *'}e.cat1.required=player;e.team1.required=player;if(!player){e.jersey.value='';e.toggle2.checked=false;e.block2.classList.add('hidden');resetTeams()}else if(e.origin.value){renderCategories(e.cat1)}}
-function populateRegistration(){const p=state.registration.player;e.type.value=p.participant_type||'player';e.first.value=p.first_name||'';e.last.value=p.last_name||'';e.birth.value=p.birth_date||'';e.nationality.value=p.nationality||'';e.email.value=p.email||'';e.jersey.value=p.jersey_number||'';e.origin.value=p.origin_club_id||'';applyParticipantType();const memberships=[...(state.registration.memberships||[])].sort((a,b)=>Number(a.membership_order)-Number(b.membership_order));if(isPlayer()&&memberships[0]){const team=state.teams.find(t=>t.id===memberships[0].team_id);if(team){e.cat1.value=team.category_id;renderTeams(e.team1,team.category_id);e.team1.value=team.id}}if(isPlayer()&&memberships[1]){const team=state.teams.find(t=>t.id===memberships[1].team_id);if(team){e.toggle2.checked=true;e.block2.classList.remove('hidden');renderCategories(e.cat2,e.cat1.value);e.cat2.value=team.category_id;renderTeams(e.team2,team.category_id);e.team2.value=team.id}}for(const day of state.mealDays){const current=(state.registration.meals||[]).find(m=>m.meal_day_id===day.id);const type=current?.meal_type||(current?.ordered?'sandwich':'none');$('meal-type-'+day.id).value=type;renderMealChoice(day);const choice=$('meal-choice-'+day.id);if(type==='sandwich'&&current?.sandwich_option_id)choice.value=current.sandwich_option_id;if(type==='hot'){if(current?.hot_preference_1==='vegetarian')$('hot-mode-'+day.id).value='vegetarian';else if(current?.hot_preference_1){$('hot-mode-'+day.id).value='other';$('hot-p1-'+day.id).value=current.hot_preference_1;if(current?.hot_preference_2)$('hot-p2-'+day.id).value=current.hot_preference_2}renderHotMode(day)}}mealTotal()}
+function populateRegistration(){const p=state.registration.player;e.type.value=p.participant_type||'player';e.first.value=p.first_name||'';e.last.value=p.last_name||'';e.birth.value=p.birth_date||'';e.nationality.value=p.nationality||'';e.email.value=p.email||'';e.jersey.value=p.jersey_number||'';e.origin.value=p.origin_club_id||'';applyParticipantType();const memberships=[...(state.registration.memberships||[])].sort((a,b)=>Number(a.membership_order)-Number(b.membership_order));if(isPlayer()&&memberships[0]){const team=state.teams.find(t=>t.id===memberships[0].team_id);if(team){e.cat1.value=team.category_id;renderTeams(e.team1,team.category_id);e.team1.value=team.id}}if(isPlayer()&&memberships[1]){const team=state.teams.find(t=>t.id===memberships[1].team_id);if(team){e.toggle2.checked=true;e.block2.classList.remove('hidden');renderCategories(e.cat2,e.cat1.value);e.cat2.value=team.category_id;renderTeams(e.team2,team.category_id);e.team2.value=team.id}}for(const day of state.mealDays){const current=(state.registration.meals||[]).find(m=>m.meal_day_id===day.id);const type=current?.meal_type||(current?.ordered?'sandwich':'none');$('meal-type-'+day.id).value=type;renderMealChoice(day);const choice=$('meal-choice-'+day.id);if(type==='sandwich'&&current?.sandwich_option_id)choice.value=current.sandwich_option_id;if(type==='hot'){let cat=current?.hot_preference_1||'';if(cat==='beef_pork')cat='pork';if(cat==='fish_seafood')cat='fish';$('hot-category-'+day.id).value=cat}}mealTotal()}
 function renderClubs(){e.origin.innerHTML='<option value="">Select your club</option>';state.clubs.forEach(c=>e.origin.add(new Option(c.name,c.id)))}
 function resetTeams(){e.cat1.innerHTML='<option value="">Select a category</option>';e.team1.innerHTML='<option value="">Select a team</option>';e.cat2.innerHTML='<option value="">Select a category</option>';e.team2.innerHTML='<option value="">Select a team</option>';e.cat1.disabled=!e.origin.value||!isPlayer();e.team1.disabled=true;e.team2.disabled=true}
 function allowedTeams(){const ids=new Set(state.access.filter(a=>a.origin_club_id===e.origin.value).map(a=>a.team_id));return state.teams.filter(t=>ids.has(t.id))}
@@ -17,13 +17,62 @@ function renderCategories(select,exclude=''){const ids=new Set(allowedTeams().ma
 function teamName(t){return t?.display_name||state.clubs.find(c=>c.id===t?.managing_club_id)?.name||'Team'}
 function renderTeams(select,categoryId){select.innerHTML='<option value="">Select a team</option>';if(!categoryId){select.disabled=true;return}const teams=allowedTeams().filter(t=>t.category_id===categoryId).sort((a,b)=>teamName(a).localeCompare(teamName(b)));teams.forEach(t=>select.add(new Option(teamName(t),t.id)));select.disabled=false;if(teams.length===1)select.value=teams[0].id}
 function prefOptions(list){return '<option value="">Select a preference</option>'+list.map(([v,n])=>`<option value="${v}">${n}</option>`).join('')}
-function renderMeals(){e.meals.innerHTML='';state.mealDays.forEach(day=>{const div=document.createElement('div');div.className='meal-card';div.innerHTML=`<h3>${esc(day.name)}</h3><label>Menu<select id="meal-type-${day.id}"><option value="none">No meal</option><option value="sandwich">Sandwich menu — CHF ${formatPrice(day.price_chf)}</option><option value="hot">Hot meal — CHF ${formatPrice(day.hot_price_chf)}</option></select></label><label id="meal-choice-wrap-${day.id}" class="hidden">Choice<select id="meal-choice-${day.id}"></select></label><div id="hot-pref-wrap-${day.id}" class="hidden"><label>Vegetarian or other<select id="hot-mode-${day.id}"><option value="">Select</option><option value="vegetarian">Vegetarian</option><option value="other">Other</option></select></label><div id="hot-other-${day.id}" class="hidden"><label>Priority 1<select id="hot-p1-${day.id}">${prefOptions(HOT_PRIMARY)}</select></label><label>Priority 2<select id="hot-p2-${day.id}">${prefOptions(HOT_ALT)}</select></label></div></div>`;e.meals.appendChild(div);const type=$('meal-type-'+day.id),choice=$('meal-choice-'+day.id);type.onchange=()=>{renderMealChoice(day);mealTotal()};choice.onchange=mealTotal;$('hot-mode-'+day.id).onchange=()=>renderHotMode(day);renderMealChoice(day)});mealTotal()}
-function renderMealChoice(day){const type=$('meal-type-'+day.id)?.value||'none',wrap=$('meal-choice-wrap-'+day.id),hot=$('hot-pref-wrap-'+day.id),choice=$('meal-choice-'+day.id);choice.innerHTML='';wrap.classList.add('hidden');hot.classList.add('hidden');if(type==='sandwich'){state.sandwichOptions.forEach(o=>choice.add(new Option(o.name,o.id)));wrap.classList.remove('hidden')}else if(type==='hot'){hot.classList.remove('hidden')}}
-function renderHotMode(day){const mode=$('hot-mode-'+day.id)?.value||'';$('hot-other-'+day.id)?.classList.toggle('hidden',mode!=='other')}
+function renderMeals(){
+ e.meals.innerHTML='';
+ state.mealDays.forEach(day=>{
+  const div=document.createElement('div');div.className='meal-card';
+  const opts='<option value="">Select a category</option>'+HOT_CATEGORIES.map(([v,n])=>`<option value="${v}">${n}</option>`).join('');
+  div.innerHTML=`<h3>${esc(day.name)}</h3>
+   <label>Menu<select id="meal-type-${day.id}">
+    <option value="none">No meal</option>
+    <option value="sandwich">Sandwich menu — CHF ${formatPrice(day.price_chf)}</option>
+    <option value="hot">Hot meal — CHF ${formatPrice(day.hot_price_chf)}</option>
+   </select></label>
+   <label id="meal-choice-wrap-${day.id}" class="hidden">Choice<select id="meal-choice-${day.id}"></select></label>
+   <label id="hot-category-wrap-${day.id}" class="hidden">Hot meal category<select id="hot-category-${day.id}">${opts}</select></label>`;
+  e.meals.appendChild(div);
+  const type=$('meal-type-'+day.id),choice=$('meal-choice-'+day.id);
+  type.onchange=()=>{renderMealChoice(day);mealTotal()};choice.onchange=mealTotal;renderMealChoice(day)
+ });
+ mealTotal()
+}
+
+function renderMealChoice(day){
+ const type=$('meal-type-'+day.id)?.value||'none',
+  wrap=$('meal-choice-wrap-'+day.id),hot=$('hot-category-wrap-'+day.id),choice=$('meal-choice-'+day.id);
+ choice.innerHTML='';wrap.classList.add('hidden');hot.classList.add('hidden');
+ if(type==='sandwich'){state.sandwichOptions.forEach(o=>choice.add(new Option(o.name,o.id)));wrap.classList.remove('hidden')}
+ else if(type==='hot'){hot.classList.remove('hidden')}
+}
+
+function renderHotMode(){}
+
 function formatPrice(value){const n=Number(value||0);return Number.isInteger(n)?`${n}.–`:n.toFixed(2)}
 function mealTotal(){let total=0;state.mealDays.forEach(day=>{const type=$('meal-type-'+day.id)?.value||'none';if(type==='sandwich')total+=Number(day.price_chf||0);if(type==='hot')total+=Number(day.hot_price_chf||15)});e.mealTotal.textContent='CHF '+formatPrice(total)}
-function mealSelection(day){const type=$('meal-type-'+day.id)?.value||'none',choiceId=$('meal-choice-'+day.id)?.value||null;if(type==='sandwich')return{meal_type:'sandwich',sandwich_option_id:choiceId,hot_meal_option_id:null,hot_preference_1:null,hot_preference_2:null,ordered:true};if(type==='hot'){const mode=$('hot-mode-'+day.id)?.value||'';return{meal_type:'hot',sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:mode==='vegetarian'?'vegetarian':($('hot-p1-'+day.id)?.value||null),hot_preference_2:mode==='vegetarian'?null:($('hot-p2-'+day.id)?.value||null),ordered:true}};return{meal_type:'none',sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:null,hot_preference_2:null,ordered:false}}
-function validate(){clearError();for(const input of[e.type,e.first,e.last,e.birth,e.nationality,e.email])if(!input.reportValidity())return false;if(!isReferee()&&!e.origin.value)return showError('Please select your club.');if(isPlayer()){if(!e.cat1.value||!e.team1.value)return showError('Please select your first category and team.');if(e.toggle2.checked&&(!e.cat2.value||!e.team2.value))return showError('Please complete your second category and team.')}for(const day of state.mealDays){if(($('meal-type-'+day.id)?.value||'none')==='hot'){const mode=$('hot-mode-'+day.id)?.value||'',a=$('hot-p1-'+day.id)?.value,b=$('hot-p2-'+day.id)?.value;if(!mode||(mode==='other'&&(!a||!b||a===b)))return showError('Please complete the hot-meal preference.')}}if(!e.confirmation.checked)return showError('Please confirm that the updated information is correct.');return true}
+function mealSelection(day){
+ const type=$('meal-type-'+day.id)?.value||'none',choiceId=$('meal-choice-'+day.id)?.value||null;
+ if(type==='sandwich')return{meal_type:'sandwich',sandwich_option_id:choiceId,hot_meal_option_id:null,hot_preference_1:null,hot_preference_2:null,ordered:true};
+ if(type==='hot')return{meal_type:'hot',sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:$('hot-category-'+day.id)?.value||null,hot_preference_2:null,ordered:true};
+ return{meal_type:'none',sandwich_option_id:null,hot_meal_option_id:null,hot_preference_1:null,hot_preference_2:null,ordered:false}
+}
+
+function validate(){
+ clearError();
+ for(const input of[e.type,e.first,e.last,e.birth,e.nationality,e.email])if(!input.reportValidity())return false;
+ if(!isReferee()&&!e.origin.value)return showError('Please select your club.');
+ if(isPlayer()){
+  if(!e.cat1.value||!e.team1.value)return showError('Please select your first category and team.');
+  if(e.toggle2.checked&&(!e.cat2.value||!e.team2.value))return showError('Please complete your second category and team.')
+ }
+ for(const day of state.mealDays){
+  if(($('meal-type-'+day.id)?.value||'none')==='hot'&&!['chicken','pork','fish','vegetarian'].includes($('hot-category-'+day.id)?.value||'')){
+   return showError('Please select a hot-meal category.')
+  }
+ }
+ if(!e.confirmation.checked)return showError('Please confirm that the updated information is correct.');
+ return true
+}
+
 function payload(){const memberships=[];if(isPlayer()){memberships.push({team_id:e.team1.value,membership_order:1});if(e.toggle2.checked)memberships.push({team_id:e.team2.value,membership_order:2})}return{token:state.token,player:{participant_type:e.type.value,first_name:e.first.value.trim(),last_name:e.last.value.trim(),birth_date:e.birth.value,nationality:e.nationality.value.trim(),email:e.email.value.trim().toLowerCase(),jersey_number:isPlayer()?(e.jersey.value.trim()||null):null,origin_club_id:isReferee()?null:e.origin.value},memberships,meals:state.mealDays.map(day=>({meal_day_id:day.id,...mealSelection(day)}))}}
 async function save(event){event.preventDefault();if(!validate())return;e.save.disabled=true;e.save.textContent='Saving…';try{const response=await fetch('/api/edit-player',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload())});const result=await response.json();if(!response.ok)throw new Error(result.error||'The changes could not be saved.');state.registration=await loadRegistration();e.form.classList.add('hidden');e.success.classList.remove('hidden');scrollTo({top:0,behavior:'smooth'})}catch(err){showError(err.message)}finally{e.save.disabled=false;e.save.textContent='Save changes'}}
 function fatal(message){e.loading.classList.add('hidden');e.form.classList.add('hidden');e.fatal.classList.remove('hidden');e.fatalMessage.textContent=message}
